@@ -248,7 +248,7 @@ const LandingPage: React.FC = () => {
           
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 relative">
             {/* Connection lines */}
-            <div className="hidden md:block absolute top-1/2 left-1/4 right-1/4 h-0.5 bg-border -translate-y-1/2" />
+            <div className="hidden md:block absolute top-24 left-1/4 right-1/4 h-0.5 bg-gradient-to-r from-transparent via-border to-transparent" />
             
             {[
               { step: '1', title: 'Sign Up', desc: 'Create your free account in seconds' },
@@ -256,11 +256,11 @@ const LandingPage: React.FC = () => {
               { step: '3', title: 'Grow', desc: 'Get insights and achieve your goals' },
             ].map((item, index) => (
               <div key={index} className="relative text-center animate-fade-in-up" style={{ animationDelay: `${index * 200}ms` }}>
-                <div className="relative z-10 bg-background">
-                  <div className="w-16 h-16 bg-primary text-primary-foreground rounded-full flex items-center justify-center text-2xl font-bold mx-auto mb-4 shadow-lg">
+                <div className="relative z-10 bg-card border rounded-2xl p-8">
+                  <div className="w-16 h-16 bg-primary text-primary-foreground rounded-full flex items-center justify-center text-2xl font-bold mx-auto mb-6 shadow-lg">
                     {item.step}
                   </div>
-                  <h3 className="text-xl font-semibold mb-2">{item.title}</h3>
+                  <h3 className="text-xl font-semibold mb-3">{item.title}</h3>
                   <p className="text-muted-foreground">{item.desc}</p>
                 </div>
               </div>
