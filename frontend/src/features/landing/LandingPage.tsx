@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { 
-  DollarSign, 
+  Wallet2, 
   TrendingUp, 
   Shield, 
   Bell, 
@@ -43,7 +43,7 @@ const features = [
     description: 'Keep track of product warranties and get notified before they expire.',
   },
   {
-    icon: DollarSign,
+    icon: Wallet2,
     title: 'Expense Analytics',
     description: 'Detailed insights into your spending patterns and financial habits.',
   },
@@ -68,7 +68,7 @@ const LandingPage: React.FC = () => {
       <header className="fixed top-0 w-full bg-background/80 backdrop-blur-md z-50 border-b">
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
           <div className="flex items-center space-x-2">
-            <DollarSign className="h-8 w-8 text-primary" />
+            <Wallet2 className="h-8 w-8 text-primary" />
             <span className="text-2xl font-bold">Budgetify</span>
           </div>
           
@@ -201,7 +201,7 @@ const LandingPage: React.FC = () => {
       {/* Footer */}
       <footer className="border-t py-8 px-4">
         <div className="container mx-auto text-center text-sm text-muted-foreground">
-          <p>&copy; 2024 Budgetify. All rights reserved.</p>
+          <p>&copy; 2025 Budgetify. All rights reserved.</p>
         </div>
       </footer>
     </div>

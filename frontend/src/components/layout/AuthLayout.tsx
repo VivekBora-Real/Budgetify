@@ -1,6 +1,6 @@
 import React from 'react';
 import { Outlet, Link } from 'react-router-dom';
-import { Moon, Sun, DollarSign } from 'lucide-react';
+import { Moon, Sun, Wallet2 } from 'lucide-react';
 import { useAppDispatch, useAppSelector } from '../../hooks/redux';
 import { toggleTheme } from '../../store/slices/uiSlice';
 import { Button } from '@/components/ui/button';
@@ -15,7 +15,7 @@ const AuthLayout: React.FC = () => {
       <header className="border-b">
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
           <Link to="/" className="flex items-center space-x-2">
-            <DollarSign className="h-8 w-8 text-primary" />
+            <Wallet2 className="h-8 w-8 text-primary" />
             <span className="text-2xl font-bold">Budgetify</span>
           </Link>
           
@@ -42,7 +42,7 @@ const AuthLayout: React.FC = () => {
 
       {/* Footer */}
       <footer className="border-t py-4 text-center text-sm text-muted-foreground">
-        <p>&copy; 2024 Budgetify. All rights reserved.</p>
+        <p>&copy; 2025 Budgetify. All rights reserved.</p>
       </footer>
     </div>
   );

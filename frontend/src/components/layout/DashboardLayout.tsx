@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom';
 import {
-  DollarSign,
+  Wallet2,
   LayoutDashboard,
   Receipt,
   Wallet,
@@ -55,7 +55,7 @@ const DashboardLayout: React.FC = () => {
           {/* Logo */}
           <div className="flex h-16 items-center justify-between px-4 border-b">
             <Link to="/dashboard" className="flex items-center space-x-2">
-              <DollarSign className="h-8 w-8 text-primary" />
+              <Wallet2 className="h-8 w-8 text-primary" />
               <span className="text-xl font-bold">Budgetify</span>
             </Link>
             <Button
