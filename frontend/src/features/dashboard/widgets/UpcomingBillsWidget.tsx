@@ -1,81 +1,22 @@
 import React from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Calendar, Clock, CreditCard, AlertTriangle } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { format, differenceInDays } from 'date-fns';
-
-interface Bill {
-  id: string;
-  name: string;
-  amount: number;
-  dueDate: Date;
-  category: string;
-  isPaid: boolean;
-  isRecurring: boolean;
-  frequency?: 'monthly' | 'quarterly' | 'annually';
-}
+import dashboardService, { UpcomingBill } from '@/services/dashboard.service';
 
 interface UpcomingBillsProps {
-  bills?: Bill[];
+  bills?: UpcomingBill[];
 }
 
-const UpcomingBillsWidget: React.FC<UpcomingBillsProps> = ({ bills }) => {
-  const mockBills: Bill[] = [
-    {
-      id: '1',
-      name: 'Rent Payment',
-      amount: 1800,
-      dueDate: new Date('2024-02-01'),
-      category: 'Housing',
-      isPaid: false,
-      isRecurring: true,
-      frequency: 'monthly',
-    },
-    {
-      id: '2',
-      name: 'Internet & Cable',
-      amount: 120,
-      dueDate: new Date('2024-01-28'),
-      category: 'Utilities',
-      isPaid: false,
-      isRecurring: true,
-      frequency: 'monthly',
-    },
-    {
-      id: '3',
-      name: 'Car Insurance',
-      amount: 350,
-      dueDate: new Date('2024-01-25'),
-      category: 'Insurance',
-      isPaid: true,
-      isRecurring: true,
-      frequency: 'quarterly',
-    },
-    {
-      id: '4',
-      name: 'Gym Membership',
-      amount: 50,
-      dueDate: new Date('2024-01-30'),
-      category: 'Health',
-      isPaid: false,
-      isRecurring: true,
-      frequency: 'monthly',
-    },
-    {
-      id: '5',
-      name: 'Electricity Bill',
-      amount: 85,
-      dueDate: new Date('2024-02-05'),
-      category: 'Utilities',
-      isPaid: false,
-      isRecurring: true,
-      frequency: 'monthly',
-    },
-  ];
-
-  const data = bills || mockBills;
+const UpcomingBillsWidget: React.FC<UpcomingBillsProps> = () => {
+  const { data: bills, isLoading } = useQuery({
+    queryKey: ['dashboard-upcoming-bills'],
+    queryFn: () => dashboardService.getUpcomingBills(),
+  });
   const today = new Date();
 
   const formatCurrency = (amount: number) => {
@@ -86,8 +27,8 @@ const UpcomingBillsWidget: React.FC<UpcomingBillsProps> = ({ bills }) => {
     }).format(amount);
   };
 
-  const getDaysUntilDue = (dueDate: Date) => {
-    return differenceInDays(dueDate, today);
+  const getDaysUntilDue = (dueDate: string) => {
+    return differenceInDays(new Date(dueDate), today);
   };
 
   const getDueDateStatus = (daysUntil: number, isPaid: boolean) => {
@@ -97,6 +38,19 @@ const UpcomingBillsWidget: React.FC<UpcomingBillsProps> = ({ bills }) => {
     return { color: 'text-blue-600 bg-blue-50', label: `${daysUntil} days` };
   };
 
+  if (isLoading) {
+    return (
+      <Card className="h-full">
+        <CardContent className="p-6">
+          <div className="flex items-center justify-center h-full">
+            Loading...
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  const data = bills || [];
   const unpaidBills = data.filter(bill => !bill.isPaid);
   const totalUpcoming = unpaidBills.reduce((sum, bill) => sum + bill.amount, 0);
 
@@ -110,38 +64,44 @@ const UpcomingBillsWidget: React.FC<UpcomingBillsProps> = ({ bills }) => {
         </Badge>
       </CardHeader>
       <CardContent>
-        <div className="space-y-3">
-          {data.map((bill) => {
-            const daysUntil = getDaysUntilDue(bill.dueDate);
-            const status = getDueDateStatus(daysUntil, bill.isPaid);
-            
-            return (
-              <div
-                key={bill.id}
-                className={cn(
-                  'flex items-center justify-between p-3 rounded-lg border',
-                  bill.isPaid && 'opacity-60'
-                )}
-              >
-                <div className="space-y-1">
-                  <div className="flex items-center gap-2">
-                    <p className={cn('font-medium', bill.isPaid && 'line-through')}>
-                      {bill.name}
-                    </p>
-                    {bill.isRecurring && (
-                      <Badge variant="secondary" className="text-xs">
-                        <Clock className="h-3 w-3 mr-1" />
-                        {bill.frequency}
-                      </Badge>
+        {data.length === 0 ? (
+          <div className="text-center py-8 text-muted-foreground">
+            No upcoming bills. Add reminders to track your bills.
+          </div>
+        ) : (
+          <>
+            <div className="space-y-3">
+              {data.map((bill) => {
+                const daysUntil = getDaysUntilDue(bill.dueDate);
+                const status = getDueDateStatus(daysUntil, bill.isPaid);
+                
+                return (
+                  <div
+                    key={bill.id}
+                    className={cn(
+                      'flex items-center justify-between p-3 rounded-lg border',
+                      bill.isPaid && 'opacity-60'
                     )}
-                  </div>
-                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                    <Calendar className="h-3 w-3" />
-                    <span>{format(bill.dueDate, 'MMM d, yyyy')}</span>
-                    <span>•</span>
-                    <span>{bill.category}</span>
-                  </div>
-                </div>
+                  >
+                    <div className="space-y-1">
+                      <div className="flex items-center gap-2">
+                        <p className={cn('font-medium', bill.isPaid && 'line-through')}>
+                          {bill.name}
+                        </p>
+                        {bill.isRecurring && (
+                          <Badge variant="secondary" className="text-xs">
+                            <Clock className="h-3 w-3 mr-1" />
+                            {bill.frequency}
+                          </Badge>
+                        )}
+                      </div>
+                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                        <Calendar className="h-3 w-3" />
+                        <span>{format(new Date(bill.dueDate), 'MMM d, yyyy')}</span>
+                        <span>•</span>
+                        <span>{bill.category}</span>
+                      </div>
+                    </div>
                 <div className="flex items-center gap-3">
                   <div className="text-right">
                     <p className="font-semibold">{formatCurrency(bill.amount)}</p>
@@ -162,14 +122,16 @@ const UpcomingBillsWidget: React.FC<UpcomingBillsProps> = ({ bills }) => {
                   )}
                 </div>
               </div>
-            );
-          })}
-        </div>
-        <div className="mt-4 pt-4 border-t">
-          <Button variant="link" className="w-full">
-            View All Bills →
-          </Button>
-        </div>
+                );
+              })}
+            </div>
+            <div className="mt-4 pt-4 border-t">
+              <Button variant="link" className="w-full">
+                View All Bills →
+              </Button>
+            </div>
+          </>
+        )}
       </CardContent>
     </Card>
   );

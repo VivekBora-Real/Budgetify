@@ -9,7 +9,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
-import { Eye, EyeOff } from 'lucide-react';
+import { Eye, EyeOff, UserCircle } from 'lucide-react';
 
 const loginSchema = z.object({
   email: z.string().email('Invalid email address'),
@@ -27,6 +27,7 @@ const Login: React.FC = () => {
   const {
     register,
     handleSubmit,
+    setValue,
     formState: { errors },
   } = useForm<LoginFormData>({
     resolver: zodResolver(loginSchema),
@@ -45,6 +46,12 @@ const Login: React.FC = () => {
     }
   };
 
+  const handleDemoLogin = () => {
+    setValue('email', 'demo@budgetapp.com');
+    setValue('password', 'Demo123!');
+    handleSubmit(onSubmit)();
+  };
+
   return (
     <Card>
       <CardHeader className="space-y-1">
@@ -53,6 +60,26 @@ const Login: React.FC = () => {
           Enter your email and password to sign in to your account
         </CardDescription>
       </CardHeader>
+      <div className="px-6 pb-2">
+        <Button
+          type="button"
+          variant="outline"
+          className="w-full"
+          onClick={handleDemoLogin}
+          disabled={loading}
+        >
+          <UserCircle className="mr-2 h-4 w-4" />
+          Try Demo Account
+        </Button>
+        <div className="relative my-4">
+          <div className="absolute inset-0 flex items-center">
+            <span className="w-full border-t" />
+          </div>
+          <div className="relative flex justify-center text-xs uppercase">
+            <span className="bg-background px-2 text-muted-foreground">Or continue with</span>
+          </div>
+        </div>
+      </div>
       <form onSubmit={handleSubmit(onSubmit)}>
         <CardContent className="space-y-4">
           {error && (

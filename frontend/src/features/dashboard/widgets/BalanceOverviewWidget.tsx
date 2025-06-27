@@ -1,28 +1,19 @@
 import React from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ArrowUpIcon, ArrowDownIcon, DollarSign, TrendingUp, Wallet, CreditCard } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import dashboardService from '@/services/dashboard.service';
 
 interface BalanceOverviewProps {
-  data?: {
-    totalBalance: number;
-    monthlyIncome: number;
-    monthlyExpenses: number;
-    savingsRate: number;
-    netWorth: number;
-    debtAmount: number;
-  };
+  data?: any;
 }
 
-const BalanceOverviewWidget: React.FC<BalanceOverviewProps> = ({ data }) => {
-  const stats = data || {
-    totalBalance: 25680.50,
-    monthlyIncome: 8500.00,
-    monthlyExpenses: 5320.00,
-    savingsRate: 37.4,
-    netWorth: 45680.50,
-    debtAmount: 20000.00,
-  };
+const BalanceOverviewWidget: React.FC<BalanceOverviewProps> = () => {
+  const { data: stats, isLoading } = useQuery({
+    queryKey: ['dashboard-overview'],
+    queryFn: () => dashboardService.getOverview(),
+  });
 
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('en-US', {
@@ -34,6 +25,22 @@ const BalanceOverviewWidget: React.FC<BalanceOverviewProps> = ({ data }) => {
   const formatPercentage = (value: number) => {
     return `${value.toFixed(1)}%`;
   };
+
+  if (isLoading) {
+    return (
+      <Card className="h-full">
+        <CardContent className="p-6">
+          <div className="flex items-center justify-center h-full">
+            Loading...
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  if (!stats) {
+    return null;
+  }
 
   const cards = [
     {

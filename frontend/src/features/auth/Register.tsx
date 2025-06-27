@@ -9,7 +9,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
-import { Eye, EyeOff } from 'lucide-react';
+import { Eye, EyeOff, Info } from 'lucide-react';
 
 const registerSchema = z.object({
   firstName: z.string().min(1, 'First name is required'),
@@ -67,6 +67,26 @@ const Register: React.FC = () => {
           Enter your information to create your BudgetApp account
         </CardDescription>
       </CardHeader>
+      <div className="px-6 pb-2">
+        <div className="rounded-lg border bg-muted/50 p-4">
+          <div className="flex items-start space-x-3">
+            <Info className="h-5 w-5 text-muted-foreground mt-0.5" />
+            <div className="text-sm text-muted-foreground">
+              <p className="font-medium mb-1">Demo Account Available</p>
+              <p>Try our demo account to explore all features:</p>
+              <p className="mt-1">
+                Email: <code className="bg-muted px-1 py-0.5 rounded">demo@budgetapp.com</code>
+              </p>
+              <p>
+                Password: <code className="bg-muted px-1 py-0.5 rounded">Demo123!</code>
+              </p>
+              <Link to="/login" className="text-primary hover:underline mt-2 inline-block">
+                Go to login →
+              </Link>
+            </div>
+          </div>
+        </div>
+      </div>
       <form onSubmit={handleSubmit(onSubmit)}>
         <CardContent className="space-y-4">
           {error && (

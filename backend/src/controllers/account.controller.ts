@@ -1,4 +1,4 @@
-import { Request, Response, NextFunction } from 'express';
+import {  Response, NextFunction } from 'express';
 import Account from '../models/account.model';
 import Transaction from '../models/transaction.model';
 import { AuthRequest } from '../types';

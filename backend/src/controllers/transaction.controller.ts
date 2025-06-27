@@ -1,4 +1,5 @@
-import { Request, Response, NextFunction } from 'express';
+import { Response, NextFunction } from 'express';
+import mongoose from 'mongoose';
 import Transaction from '../models/transaction.model';
 import Account from '../models/account.model';
 import { AuthRequest } from '../types';
@@ -266,7 +267,7 @@ export const getTransactionStats = asyncHandler(async (
   const stats = await Transaction.aggregate([
     {
       $match: {
-        userId,
+        userId: new mongoose.Types.ObjectId(userId),
         date: { $gte: startDate, $lte: now }
       }
     },
@@ -283,7 +284,7 @@ export const getTransactionStats = asyncHandler(async (
   const categoryBreakdown = await Transaction.aggregate([
     {
       $match: {
-        userId,
+        userId: new mongoose.Types.ObjectId(userId),
         type: 'expense',
         date: { $gte: startDate, $lte: now }
       }

@@ -1,9 +1,11 @@
 import React from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
 import { AlertCircle, CheckCircle, TrendingUp } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import dashboardService from '@/services/dashboard.service';
 
 interface BudgetItem {
   category: string;
@@ -18,51 +20,11 @@ interface BudgetProgressProps {
   budgets?: BudgetItem[];
 }
 
-const BudgetProgressWidget: React.FC<BudgetProgressProps> = ({ budgets }) => {
-  const mockBudgets: BudgetItem[] = [
-    {
-      category: 'Housing',
-      spent: 1800,
-      budget: 2000,
-      percentage: 90,
-      remaining: 200,
-      status: 'warning',
-    },
-    {
-      category: 'Food & Dining',
-      spent: 650,
-      budget: 1000,
-      percentage: 65,
-      remaining: 350,
-      status: 'on-track',
-    },
-    {
-      category: 'Transportation',
-      spent: 750,
-      budget: 600,
-      percentage: 125,
-      remaining: -150,
-      status: 'exceeded',
-    },
-    {
-      category: 'Shopping',
-      spent: 400,
-      budget: 500,
-      percentage: 80,
-      remaining: 100,
-      status: 'warning',
-    },
-    {
-      category: 'Entertainment',
-      spent: 200,
-      budget: 400,
-      percentage: 50,
-      remaining: 200,
-      status: 'on-track',
-    },
-  ];
-
-  const data = budgets || mockBudgets;
+const BudgetProgressWidget: React.FC<BudgetProgressProps> = () => {
+  const { data: budgets, isLoading } = useQuery({
+    queryKey: ['dashboard-budget-progress'],
+    queryFn: () => dashboardService.getBudgetProgress(),
+  });
 
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('en-US', {
@@ -92,9 +54,22 @@ const BudgetProgressWidget: React.FC<BudgetProgressProps> = ({ budgets }) => {
     return 'bg-red-500';
   };
 
+  if (isLoading) {
+    return (
+      <Card className="h-full">
+        <CardContent className="p-6">
+          <div className="flex items-center justify-center h-full">
+            Loading...
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  const data = budgets || [];
   const totalBudget = data.reduce((sum, item) => sum + item.budget, 0);
   const totalSpent = data.reduce((sum, item) => sum + item.spent, 0);
-  const overallPercentage = (totalSpent / totalBudget) * 100;
+  const overallPercentage = totalBudget > 0 ? (totalSpent / totalBudget) * 100 : 0;
 
   return (
     <Card className="h-full">
@@ -108,63 +83,69 @@ const BudgetProgressWidget: React.FC<BudgetProgressProps> = ({ budgets }) => {
         </div>
       </CardHeader>
       <CardContent>
-        <div className="space-y-4">
-          <div className="space-y-2">
-            <div className="flex justify-between text-sm">
-              <span className="text-muted-foreground">Overall Budget</span>
-              <span className="font-medium">
-                {formatCurrency(totalSpent)} / {formatCurrency(totalBudget)}
-              </span>
+        {data.length === 0 ? (
+          <div className="text-center py-8 text-muted-foreground">
+            No budget data available
+          </div>
+        ) : (
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <div className="flex justify-between text-sm">
+                <span className="text-muted-foreground">Overall Budget</span>
+                <span className="font-medium">
+                  {formatCurrency(totalSpent)} / {formatCurrency(totalBudget)}
+                </span>
+              </div>
+              <Progress 
+                value={overallPercentage} 
+                className="h-3"
+                style={{
+                  '--progress-background': getProgressColor(overallPercentage),
+                } as any}
+              />
             </div>
-            <Progress 
-              value={overallPercentage} 
-              className="h-3"
-              style={{
-                '--progress-background': getProgressColor(overallPercentage),
-              } as any}
-            />
-          </div>
-          
-          <div className="space-y-3 mt-6">
-            {data.map((budget, index) => {
-              const StatusIcon = getStatusIcon(budget.status);
-              return (
-                <div key={index} className="space-y-2 p-3 rounded-lg border">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <span className="font-medium text-sm">{budget.category}</span>
-                      <div className={cn('p-1 rounded-full', getStatusColor(budget.status))}>
-                        <StatusIcon className="h-3 w-3" />
+            
+            <div className="space-y-3 mt-6">
+              {data.map((budget, index) => {
+                const StatusIcon = getStatusIcon(budget.status);
+                return (
+                  <div key={index} className="space-y-2 p-3 rounded-lg border">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <span className="font-medium text-sm">{budget.category}</span>
+                        <div className={cn('p-1 rounded-full', getStatusColor(budget.status))}>
+                          <StatusIcon className="h-3 w-3" />
+                        </div>
                       </div>
+                      <span className="text-sm text-muted-foreground">
+                        {formatCurrency(budget.spent)} / {formatCurrency(budget.budget)}
+                      </span>
                     </div>
-                    <span className="text-sm text-muted-foreground">
-                      {formatCurrency(budget.spent)} / {formatCurrency(budget.budget)}
-                    </span>
+                    <Progress 
+                      value={Math.min(budget.percentage, 100)} 
+                      className="h-2"
+                      style={{
+                        '--progress-background': getProgressColor(budget.percentage),
+                      } as any}
+                    />
+                    <div className="flex justify-between text-xs">
+                      <span className="text-muted-foreground">
+                        {budget.percentage}% used
+                      </span>
+                      <span className={cn(
+                        'font-medium',
+                        budget.remaining >= 0 ? 'text-green-600' : 'text-red-600'
+                      )}>
+                        {budget.remaining >= 0 ? 'Remaining: ' : 'Over: '}
+                        {formatCurrency(budget.remaining)}
+                      </span>
+                    </div>
                   </div>
-                  <Progress 
-                    value={Math.min(budget.percentage, 100)} 
-                    className="h-2"
-                    style={{
-                      '--progress-background': getProgressColor(budget.percentage),
-                    } as any}
-                  />
-                  <div className="flex justify-between text-xs">
-                    <span className="text-muted-foreground">
-                      {budget.percentage}% used
-                    </span>
-                    <span className={cn(
-                      'font-medium',
-                      budget.remaining >= 0 ? 'text-green-600' : 'text-red-600'
-                    )}>
-                      {budget.remaining >= 0 ? 'Remaining: ' : 'Over: '}
-                      {formatCurrency(budget.remaining)}
-                    </span>
-                  </div>
-                </div>
-              );
-            })}
+                );
+              })}
+            </div>
           </div>
-        </div>
+        )}
       </CardContent>
     </Card>
   );

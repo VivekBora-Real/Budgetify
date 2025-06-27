@@ -68,7 +68,7 @@ const Accounts: React.FC = () => {
   });
 
   // Fetch account stats
-  const { data: statsData } = useQuery({
+  const { data: _statsData } = useQuery({
     queryKey: ['account-stats'],
     queryFn: async () => {
       const response = await api.get('/accounts/stats');

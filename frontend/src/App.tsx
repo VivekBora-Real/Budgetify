@@ -7,6 +7,7 @@ import { useAppSelector, useAppDispatch } from './hooks/redux';
 import { setTheme } from './store/slices/uiSlice';
 import { setTokens } from './features/auth/authSlice';
 import authService from './services/auth.service';
+import { Toaster } from './components/ui/toaster';
 
 // Layouts
 import AuthLayout from './components/layout/AuthLayout';
@@ -91,6 +92,7 @@ function AppContent() {
         {/* Catch all */}
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
+      <Toaster />
     </div>
   );
 }

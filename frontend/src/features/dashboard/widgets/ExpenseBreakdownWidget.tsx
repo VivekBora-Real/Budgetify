@@ -1,7 +1,9 @@
 import React from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
+import dashboardService from '@/services/dashboard.service';
 
 interface ExpenseCategory {
   category: string;
@@ -16,22 +18,12 @@ interface ExpenseBreakdownProps {
 }
 
 const ExpenseBreakdownWidget: React.FC<ExpenseBreakdownProps> = ({ 
-  data,
   period = 'This Month' 
 }) => {
-  const mockData: ExpenseCategory[] = [
-    { category: 'Housing', amount: 1800, percentage: 33.8, color: '#3b82f6' },
-    { category: 'Food & Dining', amount: 850, percentage: 16.0, color: '#10b981' },
-    { category: 'Transportation', amount: 600, percentage: 11.3, color: '#f59e0b' },
-    { category: 'Utilities', amount: 400, percentage: 7.5, color: '#8b5cf6' },
-    { category: 'Shopping', amount: 550, percentage: 10.3, color: '#ec4899' },
-    { category: 'Entertainment', amount: 350, percentage: 6.6, color: '#06b6d4' },
-    { category: 'Healthcare', amount: 300, percentage: 5.6, color: '#f97316' },
-    { category: 'Other', amount: 470, percentage: 8.8, color: '#6b7280' },
-  ];
-
-  const expenseData = data || mockData;
-  const totalExpenses = expenseData.reduce((sum, item) => sum + item.amount, 0);
+  const { data: expenseData, isLoading } = useQuery({
+    queryKey: ['dashboard-expense-breakdown'],
+    queryFn: () => dashboardService.getExpenseBreakdown(),
+  });
 
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('en-US', {
@@ -56,6 +48,21 @@ const ExpenseBreakdownWidget: React.FC<ExpenseBreakdownProps> = ({
     return null;
   };
 
+  if (isLoading) {
+    return (
+      <Card className="h-full">
+        <CardContent className="p-6">
+          <div className="flex items-center justify-center h-full">
+            Loading...
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  const data = expenseData || [];
+  const totalExpenses = data.reduce((sum, item) => sum + item.amount, 0);
+
   return (
     <Card className="h-full">
       <CardHeader>
@@ -65,57 +72,63 @@ const ExpenseBreakdownWidget: React.FC<ExpenseBreakdownProps> = ({
         </div>
       </CardHeader>
       <CardContent>
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <div className="h-64">
-            <ResponsiveContainer width="100%" height="100%">
-              <PieChart>
-                <Pie
-                  data={expenseData}
-                  cx="50%"
-                  cy="50%"
-                  innerRadius={60}
-                  outerRadius={90}
-                  paddingAngle={2}
-                  dataKey="amount"
-                >
-                  {expenseData.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={entry.color} />
-                  ))}
-                </Pie>
-                <Tooltip content={<CustomTooltip />} />
-              </PieChart>
-            </ResponsiveContainer>
-            <div className="text-center -mt-40">
-              <p className="text-sm text-muted-foreground">Total</p>
-              <p className="text-2xl font-bold">{formatCurrency(totalExpenses)}</p>
+        {data.length === 0 ? (
+          <div className="text-center py-8 text-muted-foreground">
+            No expenses recorded this month
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div className="h-64">
+              <ResponsiveContainer width="100%" height="100%">
+                <PieChart>
+                  <Pie
+                    data={data}
+                    cx="50%"
+                    cy="50%"
+                    innerRadius={60}
+                    outerRadius={90}
+                    paddingAngle={2}
+                    dataKey="amount"
+                  >
+                    {data.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={entry.color} />
+                    ))}
+                  </Pie>
+                  <Tooltip content={<CustomTooltip />} />
+                </PieChart>
+              </ResponsiveContainer>
+              <div className="text-center -mt-40">
+                <p className="text-sm text-muted-foreground">Total</p>
+                <p className="text-2xl font-bold">{formatCurrency(totalExpenses)}</p>
+              </div>
+            </div>
+            <div className="space-y-3">
+              {data.map((category, index) => (
+                <div key={index} className="space-y-2">
+                  <div className="flex items-center justify-between text-sm">
+                    <div className="flex items-center gap-2">
+                      <div 
+                        className="w-3 h-3 rounded-full" 
+                        style={{ backgroundColor: category.color }}
+                      />
+                      <span className="font-medium">{category.category}</span>
+                    </div>
+                    <span className="text-muted-foreground">
+                      {formatCurrency(category.amount)}
+                    </span>
+                  </div>
+                  <Progress 
+                    value={category.percentage} 
+                    className="h-2"
+                    style={{
+                      '--progress-background': category.color,
+                    } as any}
+                  />
+                </div>
+              ))}
             </div>
           </div>
-          <div className="space-y-3">
-            {expenseData.map((category, index) => (
-              <div key={index} className="space-y-2">
-                <div className="flex items-center justify-between text-sm">
-                  <div className="flex items-center gap-2">
-                    <div 
-                      className="w-3 h-3 rounded-full" 
-                      style={{ backgroundColor: category.color }}
-                    />
-                    <span className="font-medium">{category.category}</span>
-                  </div>
-                  <span className="text-muted-foreground">
-                    {formatCurrency(category.amount)}
-                  </span>
-                </div>
-                <Progress 
-                  value={category.percentage} 
-                  className="h-2"
-                  style={{
-                    '--progress-background': category.color,
-                  } as any}
-                />
-              </div>
-            ))}
-          </div>
-        </div>
+        )}
       </CardContent>
     </Card>
   );
