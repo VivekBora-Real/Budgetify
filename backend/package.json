@@ -4,9 +4,13 @@
   "main": "dist/index.js",
   "scripts": {
     "dev": "nodemon --exec ts-node src/index.ts",
+    "dev:fast": "nodemon --exec ts-node --transpile-only src/index.ts",
     "build": "tsc",
+    "build:fast": "tsc -p tsconfig.build.json",
+    "build:no-check": "tsc --noEmit false --transpileOnly --skipLibCheck",
     "start": "node dist/index.js",
     "start:prod": "npm run build && node dist/index.js",
+    "start:prod:fast": "npm run build:fast && node dist/index.js",
     "lint": "eslint . --ext .ts",
     "lint:fix": "eslint . --ext .ts --fix",
     "format": "prettier --write \"src/**/*.ts\"",
