@@ -115,20 +115,20 @@ npm run test:integration # Run integration tests
 
 ### Frontend (.env)
 ```
-VITE_API_URL=http://localhost:5000/api
+VITE_API_URL=http://localhost:5001/api
 VITE_APP_ENV=development
 ```
 
 ### Backend (.env)
 ```
 NODE_ENV=development
-PORT=5000
+PORT=5001
 MONGODB_URI=mongodb://localhost:27017/budgetapp
 JWT_SECRET=your-secret-key
 JWT_REFRESH_SECRET=your-refresh-secret
 JWT_EXPIRE=7d
 JWT_REFRESH_EXPIRE=30d
-FRONTEND_URL=http://localhost:5173
+FRONTEND_URL=http://localhost:3000
 ```
 
 ## Key Features
