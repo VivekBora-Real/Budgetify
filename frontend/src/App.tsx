@@ -68,28 +68,30 @@ function AppContent() {
   }, [theme]);
 
   return (
-    <Routes>
-      {/* Public Routes */}
-      <Route path="/" element={<LandingPage />} />
-      <Route element={<AuthLayout />}>
-        <Route path="/login" element={isAuthenticated ? <Navigate to="/dashboard" replace /> : <Login />} />
-        <Route path="/register" element={isAuthenticated ? <Navigate to="/dashboard" replace /> : <Register />} />
-      </Route>
+    <div className="min-h-screen bg-background">
+      <Routes>
+        {/* Public Routes */}
+        <Route path="/" element={<LandingPage />} />
+        <Route element={<AuthLayout />}>
+          <Route path="/login" element={isAuthenticated ? <Navigate to="/dashboard" replace /> : <Login />} />
+          <Route path="/register" element={isAuthenticated ? <Navigate to="/dashboard" replace /> : <Register />} />
+        </Route>
 
-      {/* Protected Routes */}
-      <Route element={isAuthenticated ? <DashboardLayout /> : <Navigate to="/login" replace />}>
-        <Route path="/dashboard" element={<Dashboard />} />
-        <Route path="/transactions" element={<Transactions />} />
-        <Route path="/accounts" element={<Accounts />} />
-        <Route path="/investments" element={<Investments />} />
-        <Route path="/loans" element={<Loans />} />
-        <Route path="/reminders" element={<Reminders />} />
-        <Route path="/warranty" element={<Warranty />} />
-      </Route>
+        {/* Protected Routes */}
+        <Route element={isAuthenticated ? <DashboardLayout /> : <Navigate to="/login" replace />}>
+          <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/transactions" element={<Transactions />} />
+          <Route path="/accounts" element={<Accounts />} />
+          <Route path="/investments" element={<Investments />} />
+          <Route path="/loans" element={<Loans />} />
+          <Route path="/reminders" element={<Reminders />} />
+          <Route path="/warranty" element={<Warranty />} />
+        </Route>
 
-      {/* Catch all */}
-      <Route path="*" element={<Navigate to="/" replace />} />
-    </Routes>
+        {/* Catch all */}
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
+    </div>
   );
 }
 

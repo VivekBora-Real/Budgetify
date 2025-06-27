@@ -20,8 +20,8 @@ import {
 import { useAppDispatch, useAppSelector } from '../../hooks/redux';
 import { toggleTheme, toggleSidebar } from '../../store/slices/uiSlice';
 import { logout } from '../../features/auth/authSlice';
-import { Button } from '../ui/Button';
-import { cn } from '../../lib/utils';
+import { Button } from '@/components/ui/button';
+import { cn } from '@/lib/utils';
 
 const navigation = [
   { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },

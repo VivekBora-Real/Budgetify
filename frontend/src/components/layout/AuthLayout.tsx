@@ -3,7 +3,7 @@ import { Outlet, Link } from 'react-router-dom';
 import { Moon, Sun, DollarSign } from 'lucide-react';
 import { useAppDispatch, useAppSelector } from '../../hooks/redux';
 import { toggleTheme } from '../../store/slices/uiSlice';
-import { Button } from '../ui/Button';
+import { Button } from '@/components/ui/button';
 
 const AuthLayout: React.FC = () => {
   const dispatch = useAppDispatch();
