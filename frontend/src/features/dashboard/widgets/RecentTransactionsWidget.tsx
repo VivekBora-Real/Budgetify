@@ -54,6 +54,8 @@ const RecentTransactionsWidget: React.FC<RecentTransactionsProps> = () => {
   const { data: transactions, isLoading } = useQuery({
     queryKey: ['dashboard-recent-transactions'],
     queryFn: () => dashboardService.getRecentTransactions(5),
+    staleTime: 5 * 60 * 1000, // 5 minutes
+    refetchOnMount: false,
   });
 
   const formatCurrency = (amount: number) => {
@@ -136,13 +138,11 @@ const RecentTransactionsWidget: React.FC<RecentTransactionsProps> = () => {
 
   if (isLoading) {
     return (
-      <Card className="h-full bg-gradient-to-br from-background to-muted/20 overflow-hidden">
-        <CardContent className="p-6">
-          <div className="flex items-center justify-center h-full">
-            <div className="flex items-center gap-3">
-              <Activity className="h-5 w-5 animate-pulse text-primary" />
-              <span className="text-muted-foreground">Loading transactions...</span>
-            </div>
+      <Card className="h-full flex flex-col bg-gradient-to-br from-background to-muted/20 overflow-hidden">
+        <CardContent className="flex-1 flex items-center justify-center p-6">
+          <div className="flex items-center gap-3">
+            <Activity className="h-5 w-5 animate-pulse text-primary" />
+            <span className="text-muted-foreground">Loading transactions...</span>
           </div>
         </CardContent>
       </Card>
@@ -150,7 +150,7 @@ const RecentTransactionsWidget: React.FC<RecentTransactionsProps> = () => {
   }
 
   return (
-    <Card className="h-full bg-gradient-to-br from-background to-muted/20 overflow-hidden">
+    <Card className="h-full flex flex-col bg-gradient-to-br from-background to-muted/20 overflow-hidden">
       <CardHeader className="pb-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
@@ -170,10 +170,11 @@ const RecentTransactionsWidget: React.FC<RecentTransactionsProps> = () => {
           </Button>
         </div>
       </CardHeader>
-      <CardContent className="px-6 pb-6">
-        <div className="space-y-3">
+      <CardContent className="flex-1 flex flex-col px-6 pb-6">
+        <div className="flex-1 flex flex-col space-y-3">
           {!transactions || transactions.length === 0 ? (
-            <div className="text-center py-12">
+            <div className="flex-1 flex items-center justify-center">
+              <div className="text-center">
               <div className="p-4 bg-muted/50 rounded-full w-fit mx-auto mb-4">
                 <Receipt className="h-8 w-8 text-muted-foreground" />
               </div>
@@ -185,6 +186,7 @@ const RecentTransactionsWidget: React.FC<RecentTransactionsProps> = () => {
               >
                 Add your first transaction
               </Button>
+              </div>
             </div>
           ) : (
             transactions.map((transaction: Transaction) => {
@@ -276,7 +278,7 @@ const RecentTransactionsWidget: React.FC<RecentTransactionsProps> = () => {
         </div>
         
         {transactions && transactions.length > 0 && (
-          <div className="mt-4 pt-4 border-t">
+          <div className="pt-3 border-t">
             <Button 
               variant="ghost" 
               className="w-full hover:bg-primary/5"

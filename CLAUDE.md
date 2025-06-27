@@ -186,3 +186,4 @@ Key collections:
 - Keep environment variables secure
 - Test API endpoints with proper authentication
 - Update this file when adding new commands or changing architecture
+- Always commit changes after each task completition

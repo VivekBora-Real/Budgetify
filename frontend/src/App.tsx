@@ -5,7 +5,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { store } from './store';
 import { useAppSelector, useAppDispatch } from './hooks/redux';
 import { setTheme } from './store/slices/uiSlice';
-import { setTokens } from './features/auth/authSlice';
+import { setTokens, setUser } from './features/auth/authSlice';
 import authService from './services/auth.service';
 import { Toaster } from './components/ui/toaster';
 
@@ -31,7 +31,10 @@ const queryClient = new QueryClient({
     queries: {
       refetchOnWindowFocus: false,
       retry: 1,
-      staleTime: 5 * 60 * 1000, // 5 minutes
+      staleTime: 10 * 60 * 1000, // 10 minutes
+      cacheTime: 15 * 60 * 1000, // 15 minutes
+      refetchInterval: false, // Disable automatic refetching
+      refetchIntervalInBackground: false,
     },
   },
 });
@@ -44,8 +47,16 @@ function AppContent() {
   useEffect(() => {
     // Check for stored tokens on app load
     const tokens = authService.getStoredTokens();
-    if (tokens) {
+    const storedUser = localStorage.getItem('user');
+    
+    if (tokens && storedUser) {
       dispatch(setTokens(tokens));
+      try {
+        const user = JSON.parse(storedUser);
+        dispatch(setUser(user));
+      } catch (error) {
+        console.error('Failed to parse stored user data');
+      }
     }
 
     // Initialize theme

@@ -13,7 +13,7 @@ import {
   Sparkles,
   Activity
 } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import { cn, formatDisplayCurrency } from '@/lib/utils';
 import dashboardService from '@/services/dashboard.service';
 
 interface BalanceOverviewProps {
@@ -24,14 +24,11 @@ const BalanceOverviewWidget: React.FC<BalanceOverviewProps> = () => {
   const { data: stats, isLoading } = useQuery({
     queryKey: ['dashboard-overview'],
     queryFn: () => dashboardService.getOverview(),
+    staleTime: 5 * 60 * 1000, // 5 minutes
+    refetchOnMount: false,
   });
 
-  const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD',
-    }).format(amount);
-  };
+  // formatDisplayCurrency is now imported from utils
 
   const formatPercentage = (value: number) => {
     return `${value.toFixed(1)}%`;
@@ -59,7 +56,7 @@ const BalanceOverviewWidget: React.FC<BalanceOverviewProps> = () => {
   const cards = [
     {
       title: 'Total Balance',
-      value: formatCurrency(stats.totalBalance),
+      value: formatDisplayCurrency(stats.totalBalance),
       icon: Wallet,
       trend: 12.5,
       color: 'text-blue-600',
@@ -70,7 +67,7 @@ const BalanceOverviewWidget: React.FC<BalanceOverviewProps> = () => {
     },
     {
       title: 'Monthly Income',
-      value: formatCurrency(stats.monthlyIncome),
+      value: formatDisplayCurrency(stats.monthlyIncome),
       icon: TrendingUp,
       trend: 8.2,
       color: 'text-green-600',
@@ -81,7 +78,7 @@ const BalanceOverviewWidget: React.FC<BalanceOverviewProps> = () => {
     },
     {
       title: 'Monthly Expenses',
-      value: formatCurrency(stats.monthlyExpenses),
+      value: formatDisplayCurrency(stats.monthlyExpenses),
       icon: CreditCard,
       trend: -3.4,
       color: 'text-red-600',
@@ -103,7 +100,7 @@ const BalanceOverviewWidget: React.FC<BalanceOverviewProps> = () => {
     },
     {
       title: 'Net Worth',
-      value: formatCurrency(stats.netWorth),
+      value: formatDisplayCurrency(stats.netWorth),
       icon: Banknote,
       trend: 15.3,
       color: 'text-indigo-600',
@@ -114,7 +111,7 @@ const BalanceOverviewWidget: React.FC<BalanceOverviewProps> = () => {
     },
     {
       title: 'Total Debt',
-      value: formatCurrency(stats.debtAmount),
+      value: formatDisplayCurrency(stats.debtAmount),
       icon: DollarSign,
       trend: -8.7,
       color: 'text-orange-600',
@@ -126,7 +123,7 @@ const BalanceOverviewWidget: React.FC<BalanceOverviewProps> = () => {
   ];
 
   return (
-    <Card className="h-full bg-gradient-to-br from-background to-muted/20 overflow-hidden">
+    <Card className="h-full flex flex-col bg-gradient-to-br from-background to-muted/20 overflow-hidden">
       <CardHeader className="pb-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
@@ -138,7 +135,7 @@ const BalanceOverviewWidget: React.FC<BalanceOverviewProps> = () => {
           <span className="text-xs text-muted-foreground">Updated just now</span>
         </div>
       </CardHeader>
-      <CardContent>
+      <CardContent className="flex flex-col px-6 pb-6">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {cards.map((card, index) => {
             const Icon = card.icon;
@@ -193,7 +190,8 @@ const BalanceOverviewWidget: React.FC<BalanceOverviewProps> = () => {
         </div>
         
         {/* Investment summary */}
-        <div className="mt-4 p-4 bg-gradient-to-r from-primary/5 to-primary/10 rounded-xl border border-primary/20">
+        <div className="mt-3">
+          <div className="p-4 bg-gradient-to-r from-primary/5 to-primary/10 rounded-xl border border-primary/20">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <div className="p-2 bg-primary/20 rounded-lg">
@@ -205,9 +203,10 @@ const BalanceOverviewWidget: React.FC<BalanceOverviewProps> = () => {
               </div>
             </div>
             <div className="text-right">
-              <p className="text-lg font-bold">{formatCurrency(stats.investmentValue)}</p>
+              <p className="text-lg font-bold">{formatDisplayCurrency(stats.investmentValue)}</p>
               <p className="text-xs text-green-600 font-medium">+18.4% YTD</p>
             </div>
+          </div>
           </div>
         </div>
       </CardContent>

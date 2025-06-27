@@ -323,3 +323,81 @@ export const getTransactionStats = asyncHandler(async (
     }
   });
 });
+
+// Export transactions as CSV
+export const exportTransactions = asyncHandler(async (
+  req: AuthRequest,
+  res: Response,
+  _next: NextFunction
+) => {
+  const userId = req.user!.userId;
+  const {
+    accountId,
+    category,
+    type,
+    startDate,
+    endDate,
+    search
+  } = req.query;
+
+  // Build query (same as getTransactions)
+  const query: any = { userId };
+
+  if (accountId) query.accountId = accountId;
+  if (category) query.category = category;
+  if (type) query.type = type;
+  if (search) {
+    query.description = { $regex: search, $options: 'i' };
+  }
+
+  // Date filtering
+  if (startDate || endDate) {
+    query.date = {};
+    if (startDate) query.date.$gte = new Date(startDate as string);
+    if (endDate) query.date.$lte = new Date(endDate as string);
+  }
+
+  // Get all transactions (no pagination for export)
+  const transactions = await Transaction.find(query)
+    .populate('accountId', 'name type')
+    .sort({ date: -1 });
+
+  // Create CSV headers
+  const csvHeaders = [
+    'Date',
+    'Type',
+    'Amount',
+    'Category',
+    'Description',
+    'Account',
+    'Account Type',
+    'Tags'
+  ].join(',');
+
+  // Convert transactions to CSV rows
+  const csvRows = transactions.map(transaction => {
+    const account = transaction.accountId as any;
+    const row = [
+      transaction.date.toISOString().split('T')[0], // Format date as YYYY-MM-DD
+      transaction.type,
+      transaction.amount.toFixed(2),
+      transaction.category,
+      `"${transaction.description.replace(/"/g, '""')}"`, // Escape quotes in description
+      account.name,
+      account.type,
+      transaction.tags.join('; ') // Join tags with semicolon
+    ];
+    return row.join(',');
+  });
+
+  // Combine headers and rows
+  const csvContent = [csvHeaders, ...csvRows].join('\n');
+
+  // Set response headers for CSV download
+  const filename = `transactions_${new Date().toISOString().split('T')[0]}.csv`;
+  res.setHeader('Content-Type', 'text/csv');
+  res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+
+  // Send CSV content
+  res.send(csvContent);
+});

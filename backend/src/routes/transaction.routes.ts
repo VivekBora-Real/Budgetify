@@ -8,7 +8,8 @@ import {
   createTransaction,
   updateTransaction,
   deleteTransaction,
-  getTransactionStats
+  getTransactionStats,
+  exportTransactions
 } from '../controllers/transaction.controller';
 
 const router = Router();
@@ -51,6 +52,13 @@ router.get(
   query('period').optional().isIn(['week', 'month', 'year']),
   validateRequest,
   getTransactionStats
+);
+
+router.get(
+  '/export',
+  queryValidation,
+  validateRequest,
+  exportTransactions
 );
 
 router.get(

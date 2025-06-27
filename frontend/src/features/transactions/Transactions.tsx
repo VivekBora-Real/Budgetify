@@ -1,9 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
+import { useDebounce } from '@/hooks/useDebounce';
 import {
   Plus,
   Search,
@@ -37,7 +38,7 @@ import {
   ArrowUpRight
 } from 'lucide-react';
 import { format } from 'date-fns';
-import { cn } from '@/lib/utils';
+import { cn, formatDisplayCurrency, formatCurrency } from '@/lib/utils';
 import api from '@/services/api';
 import TransactionDialog from './components/TransactionDialog';
 import TransactionFilters from './components/TransactionFilters';
@@ -89,6 +90,7 @@ const Transactions: React.FC = () => {
   const [showDialog, setShowDialog] = useState(false);
   const [selectedTransaction, setSelectedTransaction] = useState<Transaction | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
+  const debouncedSearchTerm = useDebounce(searchTerm, 500); // 500ms delay
   const [filters, setFilters] = useState({
     type: '',
     category: '',
@@ -101,11 +103,16 @@ const Transactions: React.FC = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [showFilters, setShowFilters] = useState(false);
 
-  // Fetch transactions
+  // Reset page when debounced search changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [debouncedSearchTerm]);
+
+  // Fetch transactions with debouncing for search
   const { data: transactionsData, isLoading } = useQuery({
     queryKey: ['transactions', { 
       page: currentPage, 
-      search: searchTerm,
+      search: debouncedSearchTerm,
       ...filters,
       sortBy,
       sortOrder
@@ -117,7 +124,7 @@ const Transactions: React.FC = () => {
       params.append('sortBy', sortBy);
       params.append('sortOrder', sortOrder);
       
-      if (searchTerm) params.append('search', searchTerm);
+      if (debouncedSearchTerm) params.append('search', debouncedSearchTerm);
       Object.entries(filters).forEach(([key, value]) => {
         if (value) params.append(key, value);
       });
@@ -125,6 +132,8 @@ const Transactions: React.FC = () => {
       const response = await api.get(`/transactions?${params}`);
       return response.data;
     },
+    staleTime: 2 * 60 * 1000, // 2 minutes
+    keepPreviousData: true,
   });
 
   // Fetch transaction stats
@@ -180,11 +189,64 @@ const Transactions: React.FC = () => {
     }
   };
 
+  const handleExport = async () => {
+    try {
+      // Build query params for export
+      const params = new URLSearchParams();
+      
+      if (debouncedSearchTerm) params.append('search', debouncedSearchTerm);
+      Object.entries(filters).forEach(([key, value]) => {
+        if (value) params.append(key, value);
+      });
+
+      // Use backend export endpoint
+      const response = await api.get(`/transactions/export?${params}`, {
+        responseType: 'blob'
+      });
+      
+      // Create download link
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', `transactions_${format(new Date(), 'yyyy-MM-dd')}.csv`);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(url);
+      
+      toast({
+        title: 'Export successful',
+        description: 'Transactions exported successfully.',
+      });
+    } catch (error: any) {
+      console.error('Export error:', error);
+      toast({
+        title: 'Export failed',
+        description: 'Unable to export transactions. Please try again.',
+        variant: 'destructive',
+      });
+    }
+  };
+
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
       currency: 'USD',
     }).format(amount);
+  };
+  
+  const formatCompactCurrency = (amount: number) => {
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'USD',
+      notation: 'compact',
+      maximumFractionDigits: 1,
+    }).format(amount);
+  };
+  
+  const formatDisplayCurrency = (amount: number) => {
+    // Use compact format for values >= 10K
+    return Math.abs(amount) >= 10000 ? formatCompactCurrency(amount) : formatCurrency(amount);
   };
 
   const getCategoryIcon = (category: string) => {
@@ -256,6 +318,9 @@ const Transactions: React.FC = () => {
     transactionCount: 0,
     categoryBreakdown: [],
   };
+  
+  // For export functionality - use displayed transactions
+  const filteredTransactions = transactions;
 
   return (
     <div className="p-6 space-y-6 animate-fade-in">
@@ -290,7 +355,7 @@ const Transactions: React.FC = () => {
               <div className="space-y-1">
                 <p className="text-sm font-medium text-green-700 dark:text-green-300">Total Income</p>
                 <p className="text-2xl font-bold text-green-900 dark:text-green-100">
-                  {formatCurrency(stats.totalIncome)}
+                  {formatDisplayCurrency(stats.totalIncome)}
                 </p>
                 <div className="flex items-center gap-1 text-xs text-green-600 dark:text-green-400">
                   <TrendingUp className="h-3 w-3" />
@@ -310,7 +375,7 @@ const Transactions: React.FC = () => {
               <div className="space-y-1">
                 <p className="text-sm font-medium text-red-700 dark:text-red-300">Total Expenses</p>
                 <p className="text-2xl font-bold text-red-900 dark:text-red-100">
-                  {formatCurrency(stats.totalExpense)}
+                  {formatDisplayCurrency(stats.totalExpense)}
                 </p>
                 <div className="flex items-center gap-1 text-xs text-red-600 dark:text-red-400">
                   <TrendingDown className="h-3 w-3" />
@@ -333,15 +398,15 @@ const Transactions: React.FC = () => {
                   "text-2xl font-bold",
                   stats.netAmount >= 0 ? "text-green-600 dark:text-green-400" : "text-red-600 dark:text-red-400"
                 )}>
-                  {formatCurrency(stats.netAmount)}
+                  {formatDisplayCurrency(stats.netAmount)}
                 </p>
                 <div className="flex items-center gap-1 text-xs text-muted-foreground">
                   <PiggyBank className="h-3 w-3" />
                   <span>Savings this month</span>
                 </div>
               </div>
-              <div className="p-3 bg-primary rounded-xl opacity-20 group-hover:opacity-30 transition-opacity">
-                <Wallet className="h-8 w-8 text-primary" />
+              <div className="p-3 bg-primary/20 rounded-xl group-hover:bg-primary/30 transition-all">
+                <PiggyBank className="h-8 w-8 text-primary" />
               </div>
             </div>
           </CardContent>
@@ -394,18 +459,27 @@ const Transactions: React.FC = () => {
                 </Badge>
               )}
             </Button>
-            <Button variant="outline" className="min-w-[120px]">
+            <Button 
+              variant="outline" 
+              className="min-w-[120px]"
+              onClick={() => handleExport()}
+            >
               <Download className="h-4 w-4 mr-2" />
               Export
             </Button>
           </div>
           
           {showFilters && (
-            <TransactionFilters
-              filters={filters}
-              onFiltersChange={setFilters}
-              className="mt-6 p-4 bg-muted/50 rounded-lg"
-            />
+            <div className="mt-6">
+              <TransactionFilters
+                filters={filters}
+                onFiltersChange={(newFilters) => {
+                  setFilters(newFilters);
+                  setCurrentPage(1); // Reset to first page when filters change
+                }}
+                className="p-4 bg-muted/50 rounded-lg"
+              />
+            </div>
           )}
         </CardContent>
       </Card>
@@ -471,8 +545,9 @@ const Transactions: React.FC = () => {
               )}
             </div>
           ) : (
-            <div className="divide-y">
-              {transactions.map((transaction: Transaction) => {
+            <div className="overflow-x-auto">
+              <div className="min-w-[600px] divide-y">
+                {transactions.map((transaction: Transaction) => {
                 const CategoryIcon = getCategoryIcon(transaction.category);
                 const categoryStyle = getCategoryColor(transaction.category);
                 
@@ -599,7 +674,8 @@ const Transactions: React.FC = () => {
                     </div>
                   </div>
                 );
-              })}
+                })}
+              </div>
             </div>
           )}
 

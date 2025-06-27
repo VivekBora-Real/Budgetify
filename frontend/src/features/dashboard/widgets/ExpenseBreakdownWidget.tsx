@@ -33,6 +33,8 @@ const ExpenseBreakdownWidget: React.FC<ExpenseBreakdownProps> = ({
   const { data: expenseData, isLoading } = useQuery({
     queryKey: ['dashboard-expense-breakdown'],
     queryFn: () => dashboardService.getExpenseBreakdown(),
+    staleTime: 5 * 60 * 1000, // 5 minutes
+    refetchOnMount: false,
   });
 
   const formatCurrency = (amount: number) => {
@@ -60,13 +62,11 @@ const ExpenseBreakdownWidget: React.FC<ExpenseBreakdownProps> = ({
 
   if (isLoading) {
     return (
-      <Card className="h-full bg-gradient-to-br from-background to-muted/20 overflow-hidden">
-        <CardContent className="p-6">
-          <div className="flex items-center justify-center h-full">
-            <div className="flex items-center gap-3">
-              <Activity className="h-5 w-5 animate-pulse text-primary" />
-              <span className="text-muted-foreground">Analyzing expenses...</span>
-            </div>
+      <Card className="h-full flex flex-col bg-gradient-to-br from-background to-muted/20 overflow-hidden">
+        <CardContent className="flex-1 flex items-center justify-center p-6">
+          <div className="flex items-center gap-3">
+            <Activity className="h-5 w-5 animate-pulse text-primary" />
+            <span className="text-muted-foreground">Analyzing expenses...</span>
           </div>
         </CardContent>
       </Card>
@@ -78,7 +78,7 @@ const ExpenseBreakdownWidget: React.FC<ExpenseBreakdownProps> = ({
   const topCategory = data.length > 0 ? data[0] : null;
 
   return (
-    <Card className="h-full bg-gradient-to-br from-background to-muted/20 overflow-hidden">
+    <Card className="h-full flex flex-col bg-gradient-to-br from-background to-muted/20 overflow-hidden">
       <CardHeader className="pb-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
@@ -110,14 +110,16 @@ const ExpenseBreakdownWidget: React.FC<ExpenseBreakdownProps> = ({
           </div>
         </div>
       </CardHeader>
-      <CardContent>
+      <CardContent className="flex-1 flex flex-col">
         {data.length === 0 ? (
-          <div className="text-center py-12">
+          <div className="flex-1 flex items-center justify-center">
+            <div className="text-center">
             <div className="p-4 bg-muted/50 rounded-full w-fit mx-auto mb-4">
               <PieChartIcon className="h-8 w-8 text-muted-foreground" />
             </div>
             <p className="text-muted-foreground mb-2">No expenses recorded</p>
             <p className="text-sm text-muted-foreground">Start tracking to see insights</p>
+            </div>
           </div>
         ) : (
           <div className="space-y-6">
@@ -243,15 +245,11 @@ const ExpenseBreakdownWidget: React.FC<ExpenseBreakdownProps> = ({
             </div>
 
             {data.length > 5 && (
-              <Button 
-                variant="ghost" 
-                className="w-full hover:bg-primary/5"
-              >
-                <span className="text-sm text-muted-foreground">
-                  View all {data.length} categories
+              <div className="text-center pt-3 border-t">
+                <span className="text-xs text-muted-foreground">
+                  Showing top 5 of {data.length} categories
                 </span>
-                <ChevronRight className="h-3 w-3 ml-2 text-muted-foreground" />
-              </Button>
+              </div>
             )}
           </div>
         )}

@@ -12,6 +12,8 @@ class ApiService {
     resolve: (value?: unknown) => void;
     reject: (reason?: any) => void;
   }> = [];
+  private requestQueue: Promise<any> = Promise.resolve();
+  private requestDelay = 100; // 100ms delay between requests
 
   constructor() {
     this.api = axios.create({
@@ -37,9 +39,13 @@ class ApiService {
   }
 
   private setupInterceptors() {
-    // Request interceptor
+    // Request interceptor with rate limiting
     this.api.interceptors.request.use(
-      (config: InternalAxiosRequestConfig) => {
+      async (config: InternalAxiosRequestConfig) => {
+        // Add rate limiting
+        await this.requestQueue;
+        this.requestQueue = new Promise(resolve => setTimeout(resolve, this.requestDelay));
+
         const state = store.getState();
         const token = state.auth.tokens?.accessToken;
 

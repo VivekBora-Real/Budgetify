@@ -42,6 +42,8 @@ const BudgetProgressWidget: React.FC<BudgetProgressProps> = () => {
   const { data: budgets, isLoading } = useQuery({
     queryKey: ['dashboard-budget-progress'],
     queryFn: () => dashboardService.getBudgetProgress(),
+    staleTime: 5 * 60 * 1000, // 5 minutes
+    refetchOnMount: false,
   });
 
   const formatCurrency = (amount: number) => {
@@ -103,13 +105,11 @@ const BudgetProgressWidget: React.FC<BudgetProgressProps> = () => {
 
   if (isLoading) {
     return (
-      <Card className="h-full bg-gradient-to-br from-background to-muted/20 overflow-hidden">
-        <CardContent className="p-6">
-          <div className="flex items-center justify-center h-full">
-            <div className="flex items-center gap-3">
-              <Activity className="h-5 w-5 animate-pulse text-primary" />
-              <span className="text-muted-foreground">Loading budget data...</span>
-            </div>
+      <Card className="h-full flex flex-col bg-gradient-to-br from-background to-muted/20 overflow-hidden">
+        <CardContent className="flex-1 flex items-center justify-center p-6">
+          <div className="flex items-center gap-3">
+            <Activity className="h-5 w-5 animate-pulse text-primary" />
+            <span className="text-muted-foreground">Loading budget data...</span>
           </div>
         </CardContent>
       </Card>
@@ -129,7 +129,7 @@ const BudgetProgressWidget: React.FC<BudgetProgressProps> = () => {
   }, {} as Record<string, number>);
 
   return (
-    <Card className="h-full bg-gradient-to-br from-background to-muted/20 overflow-hidden">
+    <Card className="h-full flex flex-col bg-gradient-to-br from-background to-muted/20 overflow-hidden">
       <CardHeader className="pb-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
@@ -138,31 +138,19 @@ const BudgetProgressWidget: React.FC<BudgetProgressProps> = () => {
             </div>
             <CardTitle className="text-lg font-semibold">Budget Progress</CardTitle>
           </div>
-          <Button 
-            variant="ghost" 
-            size="sm"
-            onClick={() => navigate('/budget')}
-            className="hover:bg-primary/10"
-          >
-            Manage
-            <ArrowRight className="h-3 w-3 ml-1" />
-          </Button>
+          <span className="text-xs text-muted-foreground">This month</span>
         </div>
       </CardHeader>
-      <CardContent>
+      <CardContent className="flex-1 flex flex-col">
         {data.length === 0 ? (
-          <div className="text-center py-12">
+          <div className="flex-1 flex items-center justify-center">
+            <div className="text-center">
             <div className="p-4 bg-muted/50 rounded-full w-fit mx-auto mb-4">
               <Target className="h-8 w-8 text-muted-foreground" />
             </div>
             <p className="text-muted-foreground mb-3">No budgets set</p>
-            <Button 
-              size="sm" 
-              onClick={() => navigate('/budget')}
-              className="bg-primary/10 hover:bg-primary/20 text-primary"
-            >
-              Create your first budget
-            </Button>
+            <p className="text-xs text-muted-foreground">Budgets will appear here</p>
+            </div>
           </div>
         ) : (
           <div className="space-y-4">

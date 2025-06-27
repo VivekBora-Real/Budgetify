@@ -52,6 +52,7 @@ export const refreshToken = createAsyncThunk(
   }
 );
 
+
 const authSlice = createSlice({
   name: 'auth',
   initialState,
@@ -80,6 +81,8 @@ const authSlice = createSlice({
         state.user = action.payload.user;
         state.tokens = action.payload.tokens;
         state.error = null;
+        // Store user data in localStorage
+        localStorage.setItem('user', JSON.stringify(action.payload.user));
       })
       .addCase(login.rejected, (state, action) => {
         state.loading = false;
@@ -98,6 +101,8 @@ const authSlice = createSlice({
         state.user = action.payload.user;
         state.tokens = action.payload.tokens;
         state.error = null;
+        // Store user data in localStorage
+        localStorage.setItem('user', JSON.stringify(action.payload.user));
       })
       .addCase(register.rejected, (state, action) => {
         state.loading = false;
@@ -111,6 +116,8 @@ const authSlice = createSlice({
         state.tokens = null;
         state.isAuthenticated = false;
         state.error = null;
+        // Clear user data from localStorage
+        localStorage.removeItem('user');
       });
     
     // Refresh token

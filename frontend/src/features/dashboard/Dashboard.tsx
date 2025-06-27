@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAppSelector, useAppDispatch } from '@/hooks/redux';
 import { widgetComponents } from './widgets';
 import { Button } from '@/components/ui/button';
@@ -22,7 +23,7 @@ import {
   PiggyBank,
   Target
 } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import { cn, formatDisplayCurrency } from '@/lib/utils';
 import {
   setEditMode,
   selectWidget,
@@ -45,26 +46,31 @@ const welcomeMessages = [
 ];
 
 // Quick stats component
-const QuickStat = ({ icon: Icon, label, value, trend, color }: any) => (
-  <div className={`bg-gradient-to-br ${color} p-4 rounded-2xl text-white transform hover:scale-105 transition-all duration-300 cursor-pointer group`}>
-    <div className="flex items-center justify-between mb-2">
-      <Icon className="h-6 w-6 opacity-80" />
-      {trend && (
-        <div className={`flex items-center text-sm ${trend > 0 ? 'text-green-200' : 'text-red-200'}`}>
-          {trend > 0 ? <ArrowUp className="h-3 w-3" /> : <ArrowDown className="h-3 w-3" />}
-          {Math.abs(trend)}%
-        </div>
-      )}
+const QuickStat = ({ icon: Icon, label, value, trend, color }: any) => {
+  // Check if value is a currency string and format it
+  const displayValue = typeof value === 'string' && value.startsWith('$') ? value : value;
+  
+  return (
+    <div className={`bg-gradient-to-br ${color} p-4 rounded-2xl text-white transform hover:scale-105 transition-all duration-300 cursor-pointer group`}>
+      <div className="flex items-center justify-between mb-2">
+        <Icon className="h-6 w-6 opacity-80" />
+        {trend && (
+          <div className={`flex items-center text-sm ${trend > 0 ? 'text-green-200' : 'text-red-200'}`}>
+            {trend > 0 ? <ArrowUp className="h-3 w-3" /> : <ArrowDown className="h-3 w-3" />}
+            {Math.abs(trend)}%
+          </div>
+        )}
+      </div>
+      <div className="space-y-1">
+        <p className="text-2xl font-bold">{displayValue}</p>
+        <p className="text-sm opacity-90">{label}</p>
+      </div>
+      <div className="absolute bottom-0 right-0 opacity-10 transform translate-x-4 translate-y-4 group-hover:scale-110 transition-transform">
+        <Icon className="h-24 w-24" />
+      </div>
     </div>
-    <div className="space-y-1">
-      <p className="text-2xl font-bold">{value}</p>
-      <p className="text-sm opacity-90">{label}</p>
-    </div>
-    <div className="absolute bottom-0 right-0 opacity-10 transform translate-x-4 translate-y-4 group-hover:scale-110 transition-transform">
-      <Icon className="h-24 w-24" />
-    </div>
-  </div>
-);
+  );
+};
 
 // Financial tip component
 const FinancialTip = () => {
@@ -98,6 +104,7 @@ const FinancialTip = () => {
 };
 
 const Dashboard: React.FC = () => {
+  const navigate = useNavigate();
   const dispatch = useAppDispatch();
   const { layout, isEditMode, selectedWidgetId } = useAppSelector(
     (state) => state.dashboard
@@ -106,6 +113,18 @@ const Dashboard: React.FC = () => {
   const [welcomeMessage] = useState(() => 
     welcomeMessages[Math.floor(Math.random() * welcomeMessages.length)]
   );
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
 
   // Get current greeting based on time
   const getGreeting = () => {
@@ -119,6 +138,8 @@ const Dashboard: React.FC = () => {
   const { data: summaryData } = useQuery({
     queryKey: ['dashboard-summary'],
     queryFn: () => dashboardService.getOverview(),
+    staleTime: 5 * 60 * 1000, // 5 minutes
+    refetchOnMount: false,
   });
 
   const handleToggleEditMode = () => {
@@ -149,10 +170,10 @@ const Dashboard: React.FC = () => {
     const WidgetComponent = widgetComponents[widget.type];
     if (!WidgetComponent) return null;
 
-    const gridStyle = {
+    const gridStyle = !isMobile ? {
       gridColumn: `span ${widget.position.w}`,
       gridRow: `span ${widget.position.h}`,
-    };
+    } : {};
 
     return (
       <div
@@ -228,18 +249,18 @@ const Dashboard: React.FC = () => {
               </p>
               
               {/* Quick Stats */}
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mt-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-6">
                 <QuickStat
                   icon={Wallet}
                   label="Total Balance"
-                  value={`$${summaryData?.totalBalance?.toLocaleString() || '0'}`}
+                  value={summaryData?.totalBalance ? formatDisplayCurrency(summaryData.totalBalance) : '$0'}
                   trend={5.2}
                   color="from-blue-500 to-blue-600"
                 />
                 <QuickStat
                   icon={TrendingUp}
                   label="This Month"
-                  value={`+$${summaryData?.monthlyIncome?.toLocaleString() || '0'}`}
+                  value={summaryData?.monthlyIncome ? `+${formatDisplayCurrency(summaryData.monthlyIncome)}` : '+$0'}
                   trend={12.5}
                   color="from-green-500 to-green-600"
                 />
@@ -252,7 +273,7 @@ const Dashboard: React.FC = () => {
                 <QuickStat
                   icon={Target}
                   label="Net Worth"
-                  value={`$${summaryData?.netWorth?.toLocaleString() || '0'}`}
+                  value={summaryData?.netWorth ? formatDisplayCurrency(summaryData.netWorth) : '$0'}
                   trend={8.3}
                   color="from-orange-500 to-orange-600"
                 />
@@ -293,16 +314,17 @@ const Dashboard: React.FC = () => {
       <FinancialTip />
 
       {/* Quick Actions */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {[
           { icon: Plus, label: 'Add Transaction', color: 'text-green-600', bg: 'bg-green-50 dark:bg-green-950', href: '/transactions' },
-          { icon: Bell, label: 'View Bills', color: 'text-blue-600', bg: 'bg-blue-50 dark:bg-blue-950', href: '/bills' },
+          { icon: Bell, label: 'View Accounts', color: 'text-blue-600', bg: 'bg-blue-50 dark:bg-blue-950', href: '/accounts' },
           { icon: TrendingUp, label: 'Investments', color: 'text-purple-600', bg: 'bg-purple-50 dark:bg-purple-950', href: '/investments' },
-          { icon: Calendar, label: 'Budget Plan', color: 'text-orange-600', bg: 'bg-orange-50 dark:bg-orange-950', href: '/budget' },
+          { icon: Calendar, label: 'View Loans', color: 'text-orange-600', bg: 'bg-orange-50 dark:bg-orange-950', href: '/loans' },
         ].map((action, index) => (
           <Card
             key={index}
             className={`p-4 hover:shadow-lg transition-all duration-300 cursor-pointer group hover:-translate-y-1 ${action.bg}`}
+            onClick={() => navigate(action.href)}
           >
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
@@ -360,12 +382,12 @@ const Dashboard: React.FC = () => {
       <div 
         className={cn(
           'grid gap-4 animate-fade-in-up',
-          `grid-cols-${layout.gridCols}`,
           isEditMode && 'min-h-[600px] bg-gradient-to-br from-muted/20 to-muted/10 p-4 rounded-2xl border-2 border-dashed border-muted-foreground/20'
         )}
         style={{
-          gridTemplateColumns: `repeat(${layout.gridCols}, 1fr)`,
-          gridAutoRows: 'minmax(120px, 1fr)',
+          gridTemplateColumns: isMobile ? '1fr' : `repeat(${layout.gridCols}, 1fr)`,
+          gridAutoRows: 'auto',
+          gridAutoFlow: 'dense'
         }}
       >
         {visibleWidgets.map(renderWidget)}

@@ -254,24 +254,24 @@ const TransactionDialog: React.FC<TransactionDialogProps> = ({
                   type="button"
                   onClick={() => setFormData(prev => ({ ...prev, type: 'income', category: '' }))}
                   className={cn(
-                    "relative p-4 rounded-xl border-2 transition-all duration-200",
+                    "relative p-3 rounded-lg border-2 transition-all duration-200",
                     "hover:shadow-md hover:border-primary/50",
                     formData.type === 'income' 
                       ? "border-green-500 bg-green-50 dark:bg-green-950/20" 
                       : "border-muted hover:border-muted-foreground/30"
                   )}
                 >
-                  <div className="flex flex-col items-center gap-2">
+                  <div className="flex items-center gap-3">
                     <div className={cn(
-                      "p-3 rounded-full transition-colors",
+                      "p-2 rounded-full transition-colors",
                       formData.type === 'income' 
                         ? "bg-green-500 text-white" 
                         : "bg-muted text-muted-foreground"
                     )}>
-                      <ArrowDownRight className="h-6 w-6" />
+                      <ArrowDownRight className="h-5 w-5" />
                     </div>
                     <span className={cn(
-                      "font-medium",
+                      "font-medium text-sm",
                       formData.type === 'income' && "text-green-700 dark:text-green-300"
                     )}>
                       Income
@@ -283,24 +283,24 @@ const TransactionDialog: React.FC<TransactionDialogProps> = ({
                   type="button"
                   onClick={() => setFormData(prev => ({ ...prev, type: 'expense', category: '' }))}
                   className={cn(
-                    "relative p-4 rounded-xl border-2 transition-all duration-200",
+                    "relative p-3 rounded-lg border-2 transition-all duration-200",
                     "hover:shadow-md hover:border-primary/50",
                     formData.type === 'expense' 
                       ? "border-red-500 bg-red-50 dark:bg-red-950/20" 
                       : "border-muted hover:border-muted-foreground/30"
                   )}
                 >
-                  <div className="flex flex-col items-center gap-2">
+                  <div className="flex items-center gap-3">
                     <div className={cn(
-                      "p-3 rounded-full transition-colors",
+                      "p-2 rounded-full transition-colors",
                       formData.type === 'expense' 
                         ? "bg-red-500 text-white" 
                         : "bg-muted text-muted-foreground"
                     )}>
-                      <ArrowUpRight className="h-6 w-6" />
+                      <ArrowUpRight className="h-5 w-5" />
                     </div>
                     <span className={cn(
-                      "font-medium",
+                      "font-medium text-sm",
                       formData.type === 'expense' && "text-red-700 dark:text-red-300"
                     )}>
                       Expense

@@ -30,6 +30,8 @@ const UpcomingBillsWidget: React.FC<UpcomingBillsProps> = () => {
   const { data: bills, isLoading } = useQuery({
     queryKey: ['dashboard-upcoming-bills'],
     queryFn: () => dashboardService.getUpcomingBills(),
+    staleTime: 5 * 60 * 1000, // 5 minutes
+    refetchOnMount: false,
   });
   const today = new Date();
 
@@ -106,13 +108,11 @@ const UpcomingBillsWidget: React.FC<UpcomingBillsProps> = () => {
 
   if (isLoading) {
     return (
-      <Card className="h-full bg-gradient-to-br from-background to-muted/20 overflow-hidden">
-        <CardContent className="p-6">
-          <div className="flex items-center justify-center h-full">
-            <div className="flex items-center gap-3">
-              <Activity className="h-5 w-5 animate-pulse text-primary" />
-              <span className="text-muted-foreground">Loading bills...</span>
-            </div>
+      <Card className="h-full flex flex-col bg-gradient-to-br from-background to-muted/20 overflow-hidden">
+        <CardContent className="flex-1 flex items-center justify-center p-6">
+          <div className="flex items-center gap-3">
+            <Activity className="h-5 w-5 animate-pulse text-primary" />
+            <span className="text-muted-foreground">Loading bills...</span>
           </div>
         </CardContent>
       </Card>
@@ -137,7 +137,7 @@ const UpcomingBillsWidget: React.FC<UpcomingBillsProps> = () => {
   });
 
   return (
-    <Card className="h-full bg-gradient-to-br from-background to-muted/20 overflow-hidden">
+    <Card className="h-full flex flex-col bg-gradient-to-br from-background to-muted/20 overflow-hidden">
       <CardHeader className="pb-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
@@ -146,31 +146,19 @@ const UpcomingBillsWidget: React.FC<UpcomingBillsProps> = () => {
             </div>
             <CardTitle className="text-lg font-semibold">Upcoming Bills</CardTitle>
           </div>
-          <Button 
-            variant="ghost" 
-            size="sm"
-            onClick={() => navigate('/bills')}
-            className="hover:bg-primary/10"
-          >
-            View All
-            <ArrowRight className="h-3 w-3 ml-1" />
-          </Button>
+          <span className="text-xs text-muted-foreground">This month</span>
         </div>
       </CardHeader>
-      <CardContent className="px-6 pb-6">
+      <CardContent className="flex-1 flex flex-col px-6 pb-6">
         {data.length === 0 ? (
-          <div className="text-center py-12">
+          <div className="flex-1 flex items-center justify-center">
+            <div className="text-center">
             <div className="p-4 bg-muted/50 rounded-full w-fit mx-auto mb-4">
               <Receipt className="h-8 w-8 text-muted-foreground" />
             </div>
             <p className="text-muted-foreground mb-3">No bills tracked</p>
-            <Button 
-              size="sm" 
-              onClick={() => navigate('/bills')}
-              className="bg-primary/10 hover:bg-primary/20 text-primary"
-            >
-              Add your first bill
-            </Button>
+            <p className="text-xs text-muted-foreground">Bills will appear here</p>
+            </div>
           </div>
         ) : (
           <>
@@ -280,16 +268,11 @@ const UpcomingBillsWidget: React.FC<UpcomingBillsProps> = () => {
             </div>
             
             {data.length > 5 && (
-              <Button 
-                variant="ghost" 
-                className="w-full mt-3 hover:bg-primary/5"
-                onClick={() => navigate('/bills')}
-              >
-                <span className="text-sm text-muted-foreground">
-                  View all {data.length} bills
+              <div className="mt-3 pt-3 border-t text-center">
+                <span className="text-xs text-muted-foreground">
+                  Showing 5 of {data.length} bills
                 </span>
-                <ArrowRight className="h-3 w-3 ml-2 text-muted-foreground" />
-              </Button>
+              </div>
             )}
           </>
         )}

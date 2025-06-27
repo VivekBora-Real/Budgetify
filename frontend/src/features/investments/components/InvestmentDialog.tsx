@@ -31,7 +31,25 @@ import investmentService, { CreateInvestmentDto, Investment } from '@/services/i
 import { format } from 'date-fns';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { CalendarIcon } from 'lucide-react';
+import { 
+  CalendarIcon,
+  LineChart,
+  DollarSign,
+  PieChart,
+  BarChart3,
+  Bitcoin,
+  Home,
+  Activity,
+  Building2,
+  Hash,
+  TrendingUp,
+  FileText,
+  Plus,
+  Edit2,
+  Loader2,
+  Calculator,
+  Tag
+} from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface InvestmentDialogProps {
@@ -41,13 +59,62 @@ interface InvestmentDialogProps {
 }
 
 const investmentTypes = [
-  { value: 'stocks', label: 'Stocks' },
-  { value: 'bonds', label: 'Bonds' },
-  { value: 'mutual_funds', label: 'Mutual Funds' },
-  { value: 'etf', label: 'ETF' },
-  { value: 'crypto', label: 'Cryptocurrency' },
-  { value: 'real_estate', label: 'Real Estate' },
-  { value: 'other', label: 'Other' },
+  { 
+    value: 'stocks', 
+    label: 'Stocks', 
+    icon: LineChart,
+    activeClasses: 'border-blue-500 bg-blue-50 dark:bg-blue-950/20',
+    iconActiveClasses: 'bg-blue-500 text-white',
+    textActiveClasses: 'text-blue-700 dark:text-blue-300'
+  },
+  { 
+    value: 'bonds', 
+    label: 'Bonds', 
+    icon: DollarSign,
+    activeClasses: 'border-green-500 bg-green-50 dark:bg-green-950/20',
+    iconActiveClasses: 'bg-green-500 text-white',
+    textActiveClasses: 'text-green-700 dark:text-green-300'
+  },
+  { 
+    value: 'mutual_funds', 
+    label: 'Mutual Funds', 
+    icon: PieChart,
+    activeClasses: 'border-purple-500 bg-purple-50 dark:bg-purple-950/20',
+    iconActiveClasses: 'bg-purple-500 text-white',
+    textActiveClasses: 'text-purple-700 dark:text-purple-300'
+  },
+  { 
+    value: 'etf', 
+    label: 'ETF', 
+    icon: BarChart3,
+    activeClasses: 'border-orange-500 bg-orange-50 dark:bg-orange-950/20',
+    iconActiveClasses: 'bg-orange-500 text-white',
+    textActiveClasses: 'text-orange-700 dark:text-orange-300'
+  },
+  { 
+    value: 'crypto', 
+    label: 'Cryptocurrency', 
+    icon: Bitcoin,
+    activeClasses: 'border-yellow-500 bg-yellow-50 dark:bg-yellow-950/20',
+    iconActiveClasses: 'bg-yellow-500 text-white',
+    textActiveClasses: 'text-yellow-700 dark:text-yellow-300'
+  },
+  { 
+    value: 'real_estate', 
+    label: 'Real Estate', 
+    icon: Home,
+    activeClasses: 'border-indigo-500 bg-indigo-50 dark:bg-indigo-950/20',
+    iconActiveClasses: 'bg-indigo-500 text-white',
+    textActiveClasses: 'text-indigo-700 dark:text-indigo-300'
+  },
+  { 
+    value: 'other', 
+    label: 'Other', 
+    icon: Activity,
+    activeClasses: 'border-gray-500 bg-gray-50 dark:bg-gray-950/20',
+    iconActiveClasses: 'bg-gray-500 text-white',
+    textActiveClasses: 'text-gray-700 dark:text-gray-300'
+  },
 ];
 
 const InvestmentDialog: React.FC<InvestmentDialogProps> = ({
@@ -163,52 +230,95 @@ const InvestmentDialog: React.FC<InvestmentDialogProps> = ({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>{isEditing ? 'Edit Investment' : 'Add Investment'}</DialogTitle>
+          <DialogTitle className="flex items-center gap-2 text-xl">
+            {isEditing ? (
+              <>
+                <Edit2 className="h-5 w-5 text-primary" />
+                Edit Investment
+              </>
+            ) : (
+              <>
+                <Plus className="h-5 w-5 text-primary" />
+                Add New Investment
+              </>
+            )}
+          </DialogTitle>
           <DialogDescription>
-            {isEditing ? 'Update your investment details' : 'Add a new investment to your portfolio'}
+            {isEditing ? 'Update your investment details and current valuation' : 'Track a new investment in your portfolio'}
           </DialogDescription>
         </DialogHeader>
 
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+            {/* Investment Type Selection */}
+            <FormField
+              control={form.control}
+              name="type"
+              render={({ field }) => (
+                <FormItem className="space-y-2">
+                  <FormLabel className="text-sm font-medium">Investment Type</FormLabel>
+                  <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
+                    {investmentTypes.map((type) => {
+                      const Icon = type.icon;
+                      const isSelected = field.value === type.value;
+                      return (
+                        <button
+                          key={type.value}
+                          type="button"
+                          onClick={() => field.onChange(type.value)}
+                          className={cn(
+                            "relative p-4 rounded-xl border-2 transition-all duration-200",
+                            "hover:shadow-md hover:border-primary/50",
+                            "flex flex-col items-center gap-2 text-center",
+                            isSelected 
+                              ? type.activeClasses 
+                              : "border-muted hover:border-muted-foreground/30"
+                          )}
+                        >
+                          <div className={cn(
+                            "p-2 rounded-full transition-colors",
+                            isSelected 
+                              ? type.iconActiveClasses 
+                              : "bg-muted text-muted-foreground"
+                          )}>
+                            <Icon className="h-5 w-5" />
+                          </div>
+                          <span className={cn(
+                            "text-sm font-medium",
+                            isSelected && type.textActiveClasses
+                          )}>
+                            {type.label}
+                          </span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            {/* Basic Information */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <FormField
                 control={form.control}
                 name="name"
                 rules={{ required: 'Investment name is required' }}
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Investment Name</FormLabel>
+                    <FormLabel className="flex items-center gap-2">
+                      <Tag className="h-4 w-4 text-primary" />
+                      Investment Name
+                    </FormLabel>
                     <FormControl>
-                      <Input placeholder="e.g., Apple Inc." {...field} />
+                      <Input 
+                        placeholder="e.g., Apple Inc., Bitcoin" 
+                        className="h-11"
+                        {...field} 
+                      />
                     </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="type"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Type</FormLabel>
-                    <Select onValueChange={field.onChange} value={field.value}>
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select investment type" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        {investmentTypes.map((type) => (
-                          <SelectItem key={type.value} value={type.value}>
-                            {type.label}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -219,9 +329,17 @@ const InvestmentDialog: React.FC<InvestmentDialogProps> = ({
                 name="symbol"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Symbol/Ticker (Optional)</FormLabel>
+                    <FormLabel className="flex items-center gap-2">
+                      <Hash className="h-4 w-4 text-primary" />
+                      Symbol/Ticker 
+                      <span className="text-xs text-muted-foreground">(Optional)</span>
+                    </FormLabel>
                     <FormControl>
-                      <Input placeholder="e.g., AAPL" {...field} />
+                      <Input 
+                        placeholder="e.g., AAPL, BTC" 
+                        className="h-11"
+                        {...field} 
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -234,80 +352,15 @@ const InvestmentDialog: React.FC<InvestmentDialogProps> = ({
                 rules={{ required: 'Broker is required' }}
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Broker/Platform</FormLabel>
-                    <FormControl>
-                      <Input placeholder="e.g., Fidelity, Robinhood" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="quantity"
-                rules={{ 
-                  required: 'Quantity is required',
-                  min: { value: 0, message: 'Quantity must be positive' }
-                }}
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Quantity/Shares</FormLabel>
+                    <FormLabel className="flex items-center gap-2">
+                      <Building2 className="h-4 w-4 text-primary" />
+                      Broker/Platform
+                    </FormLabel>
                     <FormControl>
                       <Input 
-                        type="number" 
-                        step="0.001"
-                        placeholder="0" 
+                        placeholder="e.g., Fidelity, Robinhood, Coinbase" 
+                        className="h-11"
                         {...field} 
-                        onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="purchasePrice"
-                rules={{ 
-                  required: 'Purchase price is required',
-                  min: { value: 0, message: 'Price must be positive' }
-                }}
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Purchase Price per Unit</FormLabel>
-                    <FormControl>
-                      <Input 
-                        type="number" 
-                        step="0.01"
-                        placeholder="0.00" 
-                        {...field} 
-                        onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="currentPrice"
-                rules={{ 
-                  required: 'Current price is required',
-                  min: { value: 0, message: 'Price must be positive' }
-                }}
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Current Price per Unit</FormLabel>
-                    <FormControl>
-                      <Input 
-                        type="number" 
-                        step="0.01"
-                        placeholder="0.00" 
-                        {...field} 
-                        onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
                       />
                     </FormControl>
                     <FormMessage />
@@ -321,23 +374,26 @@ const InvestmentDialog: React.FC<InvestmentDialogProps> = ({
                 rules={{ required: 'Purchase date is required' }}
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Purchase Date</FormLabel>
+                    <FormLabel className="flex items-center gap-2">
+                      <CalendarIcon className="h-4 w-4 text-primary" />
+                      Purchase Date
+                    </FormLabel>
                     <Popover>
                       <PopoverTrigger asChild>
                         <FormControl>
                           <Button
                             variant="outline"
                             className={cn(
-                              'w-full pl-3 text-left font-normal',
+                              'w-full h-11 justify-start text-left font-normal',
                               !field.value && 'text-muted-foreground'
                             )}
                           >
+                            <CalendarIcon className="mr-2 h-4 w-4" />
                             {field.value ? (
                               format(new Date(field.value), 'PPP')
                             ) : (
-                              <span>Pick a date</span>
+                              <span>Select purchase date</span>
                             )}
-                            <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
                           </Button>
                         </FormControl>
                       </PopoverTrigger>
@@ -359,16 +415,121 @@ const InvestmentDialog: React.FC<InvestmentDialogProps> = ({
               />
             </div>
 
+            {/* Quantity and Pricing */}
+            <div className="space-y-4">
+              <h3 className="text-sm font-medium flex items-center gap-2">
+                <Calculator className="h-4 w-4 text-primary" />
+                Investment Details
+              </h3>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <FormField
+                  control={form.control}
+                  name="quantity"
+                  rules={{ 
+                    required: 'Quantity is required',
+                    min: { value: 0, message: 'Quantity must be positive' }
+                  }}
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Quantity/Shares</FormLabel>
+                      <FormControl>
+                        <div className="relative">
+                          <Input 
+                            type="number" 
+                            step="0.001"
+                            placeholder="0" 
+                            className="h-11 pr-12 text-lg font-semibold"
+                            {...field} 
+                            onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
+                          />
+                          <span className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground text-sm">
+                            units
+                          </span>
+                        </div>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="purchasePrice"
+                  rules={{ 
+                    required: 'Purchase price is required',
+                    min: { value: 0, message: 'Price must be positive' }
+                  }}
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Purchase Price</FormLabel>
+                      <FormControl>
+                        <div className="relative">
+                          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
+                            $
+                          </span>
+                          <Input 
+                            type="number" 
+                            step="0.01"
+                            placeholder="0.00" 
+                            className="h-11 pl-8 text-lg font-semibold"
+                            {...field} 
+                            onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
+                          />
+                        </div>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="currentPrice"
+                  rules={{ 
+                    required: 'Current price is required',
+                    min: { value: 0, message: 'Price must be positive' }
+                  }}
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Current Price</FormLabel>
+                      <FormControl>
+                        <div className="relative">
+                          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
+                            $
+                          </span>
+                          <Input 
+                            type="number" 
+                            step="0.01"
+                            placeholder="0.00" 
+                            className="h-11 pl-8 text-lg font-semibold"
+                            {...field} 
+                            onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
+                          />
+                        </div>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+            </div>
+
+            {/* Notes */}
             <FormField
               control={form.control}
               name="notes"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Notes (Optional)</FormLabel>
+                  <FormLabel className="flex items-center gap-2">
+                    <FileText className="h-4 w-4 text-primary" />
+                    Notes 
+                    <span className="text-xs text-muted-foreground">(Optional)</span>
+                  </FormLabel>
                   <FormControl>
                     <Textarea 
-                      placeholder="Add any notes about this investment..."
+                      placeholder="Add any notes, reasons for investment, or target prices..."
                       rows={3}
+                      className="resize-none"
                       {...field} 
                     />
                   </FormControl>
@@ -377,32 +538,54 @@ const InvestmentDialog: React.FC<InvestmentDialogProps> = ({
               )}
             />
 
+            {/* Investment Summary */}
             {(form.watch('quantity') > 0 && form.watch('purchasePrice') > 0 && form.watch('currentPrice') > 0) && (
-              <div className="bg-muted p-4 rounded-lg space-y-2">
-                <h4 className="font-medium text-sm">Investment Summary</h4>
-                <div className="grid grid-cols-2 gap-2 text-sm">
-                  <div>
-                    <span className="text-muted-foreground">Invested Amount:</span>
-                    <span className="ml-2 font-medium">${investedAmount.toFixed(2)}</span>
+              <div className="relative overflow-hidden rounded-xl border bg-gradient-to-br from-primary/5 to-primary/10 p-6">
+                <div className="absolute top-2 right-2">
+                  <TrendingUp className="h-8 w-8 text-primary/20" />
+                </div>
+                <h4 className="font-semibold text-sm mb-4 flex items-center gap-2">
+                  <BarChart3 className="h-4 w-4 text-primary" />
+                  Investment Summary
+                </h4>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                  <div className="space-y-1">
+                    <p className="text-sm text-muted-foreground">Invested Amount</p>
+                    <p className="text-2xl font-bold">
+                      ${investedAmount.toFixed(2)}
+                    </p>
                   </div>
-                  <div>
-                    <span className="text-muted-foreground">Current Value:</span>
-                    <span className="ml-2 font-medium">${totalValue.toFixed(2)}</span>
+                  <div className="space-y-1">
+                    <p className="text-sm text-muted-foreground">Current Value</p>
+                    <p className="text-2xl font-bold">
+                      ${totalValue.toFixed(2)}
+                    </p>
                   </div>
-                  <div>
-                    <span className="text-muted-foreground">Gain/Loss:</span>
-                    <span className={cn(
-                      'ml-2 font-medium',
-                      gainLoss >= 0 ? 'text-green-600' : 'text-red-600'
+                  <div className="space-y-1">
+                    <p className="text-sm text-muted-foreground">Total Return</p>
+                    <p className={cn(
+                      "text-2xl font-bold",
+                      gainLoss >= 0 
+                        ? "text-emerald-600 dark:text-emerald-400" 
+                        : "text-red-600 dark:text-red-400"
                     )}>
-                      ${gainLoss.toFixed(2)} ({gainLossPercentage.toFixed(2)}%)
-                    </span>
+                      {gainLoss >= 0 ? '+' : '-'}${Math.abs(gainLoss).toFixed(2)}
+                    </p>
+                    <p className={cn(
+                      "text-sm font-medium",
+                      gainLoss >= 0 
+                        ? "text-emerald-600 dark:text-emerald-400" 
+                        : "text-red-600 dark:text-red-400"
+                    )}>
+                      {gainLoss >= 0 ? '+' : '-'}{Math.abs(gainLossPercentage).toFixed(2)}%
+                    </p>
                   </div>
                 </div>
               </div>
             )}
 
-            <div className="flex justify-end gap-3">
+            {/* Actions */}
+            <div className="flex justify-end gap-3 pt-4 border-t">
               <Button
                 type="button"
                 variant="outline"
@@ -410,8 +593,31 @@ const InvestmentDialog: React.FC<InvestmentDialogProps> = ({
               >
                 Cancel
               </Button>
-              <Button type="submit" disabled={createMutation.isPending || updateMutation.isPending}>
-                {createMutation.isPending || updateMutation.isPending ? 'Saving...' : isEditing ? 'Update' : 'Create'}
+              <Button 
+                type="submit" 
+                disabled={createMutation.isPending || updateMutation.isPending}
+                className="min-w-[120px]"
+              >
+                {(createMutation.isPending || updateMutation.isPending) ? (
+                  <>
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    Saving...
+                  </>
+                ) : (
+                  <>
+                    {isEditing ? (
+                      <>
+                        <Edit2 className="h-4 w-4 mr-2" />
+                        Update Investment
+                      </>
+                    ) : (
+                      <>
+                        <Plus className="h-4 w-4 mr-2" />
+                        Add Investment
+                      </>
+                    )}
+                  </>
+                )}
               </Button>
             </div>
           </form>

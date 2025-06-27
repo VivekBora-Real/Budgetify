@@ -34,6 +34,7 @@ class AuthService {
     return response.data;
   }
 
+
   private setTokens(tokens: AuthTokens) {
     localStorage.setItem('accessToken', tokens.accessToken);
     localStorage.setItem('refreshToken', tokens.refreshToken);

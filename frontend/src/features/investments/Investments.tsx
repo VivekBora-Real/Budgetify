@@ -39,20 +39,27 @@ import {
   PieChart,
   BarChart3,
   Building2,
+  Bitcoin,
+  LineChart,
+  Home,
+  Sparkles,
+  ArrowUp,
+  ArrowDown,
+  Activity
 } from 'lucide-react';
 import { format } from 'date-fns';
-import { cn } from '@/lib/utils';
+import { cn, formatDisplayCurrency, formatCurrency } from '@/lib/utils';
 import investmentService, { Investment, InvestmentQueryParams } from '@/services/investment.service';
 import InvestmentDialog from './components/InvestmentDialog';
 
 const investmentTypeConfig = {
-  stocks: { label: 'Stocks', color: 'bg-blue-100 text-blue-800', icon: BarChart3 },
-  bonds: { label: 'Bonds', color: 'bg-green-100 text-green-800', icon: DollarSign },
-  mutual_funds: { label: 'Mutual Funds', color: 'bg-purple-100 text-purple-800', icon: PieChart },
-  etf: { label: 'ETF', color: 'bg-orange-100 text-orange-800', icon: BarChart3 },
-  crypto: { label: 'Crypto', color: 'bg-yellow-100 text-yellow-800', icon: DollarSign },
-  real_estate: { label: 'Real Estate', color: 'bg-indigo-100 text-indigo-800', icon: Building2 },
-  other: { label: 'Other', color: 'bg-gray-100 text-gray-800', icon: DollarSign },
+  stocks: { label: 'Stocks', color: 'bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/20', icon: LineChart, gradient: 'from-blue-500/10 to-blue-600/10' },
+  bonds: { label: 'Bonds', color: 'bg-green-500/10 text-green-600 dark:text-green-400 border-green-500/20', icon: DollarSign, gradient: 'from-green-500/10 to-green-600/10' },
+  mutual_funds: { label: 'Mutual Funds', color: 'bg-purple-500/10 text-purple-600 dark:text-purple-400 border-purple-500/20', icon: PieChart, gradient: 'from-purple-500/10 to-purple-600/10' },
+  etf: { label: 'ETF', color: 'bg-orange-500/10 text-orange-600 dark:text-orange-400 border-orange-500/20', icon: BarChart3, gradient: 'from-orange-500/10 to-orange-600/10' },
+  crypto: { label: 'Crypto', color: 'bg-yellow-500/10 text-yellow-600 dark:text-yellow-400 border-yellow-500/20', icon: Bitcoin, gradient: 'from-yellow-500/10 to-yellow-600/10' },
+  real_estate: { label: 'Real Estate', color: 'bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border-indigo-500/20', icon: Home, gradient: 'from-indigo-500/10 to-indigo-600/10' },
+  other: { label: 'Other', color: 'bg-gray-500/10 text-gray-600 dark:text-gray-400 border-gray-500/20', icon: Activity, gradient: 'from-gray-500/10 to-gray-600/10' },
 };
 
 const Investments: React.FC = () => {
@@ -111,12 +118,7 @@ const Investments: React.FC = () => {
     }
   };
 
-  const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD',
-    }).format(amount);
-  };
+  // formatCurrency is now imported from utils
 
   const formatPercentage = (value: number) => {
     return `${value.toFixed(2)}%`;
@@ -141,99 +143,153 @@ const Investments: React.FC = () => {
   };
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="p-6 space-y-8">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold">Investment Portfolio</h1>
-          <p className="text-muted-foreground">Track and manage your investments</p>
+          <h1 className="text-3xl font-bold bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">
+            Investment Portfolio
+          </h1>
+          <p className="text-muted-foreground mt-1">
+            Track performance and manage your investment portfolio
+          </p>
         </div>
         <Button
           onClick={() => {
             setSelectedInvestment(null);
             setDialogOpen(true);
           }}
+          className="bg-primary hover:bg-primary/90 shadow-lg hover:shadow-xl transition-all duration-200"
         >
           <Plus className="mr-2 h-4 w-4" />
           Add Investment
         </Button>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Invested</CardTitle>
-            <DollarSign className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{formatCurrency(summary.totalInvested)}</div>
-            <p className="text-xs text-muted-foreground">Principal amount</p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Current Value</CardTitle>
-            <BarChart3 className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{formatCurrency(summary.currentValue)}</div>
-            <p className="text-xs text-muted-foreground">Market value</p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Gain/Loss</CardTitle>
-            {summary.totalGainLoss >= 0 ? (
-              <TrendingUp className="h-4 w-4 text-green-600" />
-            ) : (
-              <TrendingDown className="h-4 w-4 text-red-600" />
-            )}
-          </CardHeader>
-          <CardContent>
-            <div className={cn(
-              "text-2xl font-bold",
-              summary.totalGainLoss >= 0 ? "text-green-600" : "text-red-600"
-            )}>
-              {formatCurrency(Math.abs(summary.totalGainLoss))}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <Card className="bg-gradient-to-br from-blue-500/10 to-blue-600/10 border-blue-500/20 hover:shadow-lg transition-all duration-300">
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div className="space-y-1">
+                <p className="text-sm font-medium text-muted-foreground">Total Invested</p>
+                <p className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-blue-500 bg-clip-text text-transparent">
+                  {formatDisplayCurrency(summary.totalInvested)}
+                </p>
+                <p className="text-xs text-muted-foreground">Principal amount</p>
+              </div>
+              <div className="p-3 bg-blue-500/20 rounded-2xl">
+                <DollarSign className="h-8 w-8 text-blue-600 dark:text-blue-400" />
+              </div>
             </div>
-            <p className={cn(
-              "text-xs",
-              summary.totalGainLoss >= 0 ? "text-green-600" : "text-red-600"
-            )}>
-              {summary.totalGainLoss >= 0 ? '+' : '-'}{formatPercentage(Math.abs(summary.totalGainLossPercentage))}
-            </p>
           </CardContent>
         </Card>
 
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Investments</CardTitle>
-            <PieChart className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{summary.count}</div>
-            <p className="text-xs text-muted-foreground">Active positions</p>
+        <Card className="bg-gradient-to-br from-cyan-500/10 to-cyan-600/10 border-cyan-500/20 hover:shadow-lg transition-all duration-300">
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div className="space-y-1">
+                <p className="text-sm font-medium text-muted-foreground">Current Value</p>
+                <p className="text-3xl font-bold text-cyan-600 dark:text-cyan-400">
+                  {formatDisplayCurrency(summary.currentValue)}
+                </p>
+                <p className="text-xs text-muted-foreground">Market value</p>
+              </div>
+              <div className="p-3 bg-cyan-500/20 rounded-2xl">
+                <BarChart3 className="h-8 w-8 text-cyan-600 dark:text-cyan-400" />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className={cn(
+          "hover:shadow-lg transition-all duration-300",
+          summary.totalGainLoss >= 0 
+            ? "bg-gradient-to-br from-emerald-500/10 to-emerald-600/10 border-emerald-500/20"
+            : "bg-gradient-to-br from-red-500/10 to-red-600/10 border-red-500/20"
+        )}>
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div className="space-y-1">
+                <p className="text-sm font-medium text-muted-foreground">Total Gain/Loss</p>
+                <p className={cn(
+                  "text-3xl font-bold",
+                  summary.totalGainLoss >= 0 
+                    ? "text-emerald-600 dark:text-emerald-400" 
+                    : "text-red-600 dark:text-red-400"
+                )}>
+                  {summary.totalGainLoss >= 0 ? '+' : '-'}{formatDisplayCurrency(Math.abs(summary.totalGainLoss))}
+                </p>
+                <div className={cn(
+                  "flex items-center gap-1 text-xs font-medium",
+                  summary.totalGainLoss >= 0 
+                    ? "text-emerald-600 dark:text-emerald-400" 
+                    : "text-red-600 dark:text-red-400"
+                )}>
+                  {summary.totalGainLoss >= 0 ? (
+                    <ArrowUp className="h-3 w-3" />
+                  ) : (
+                    <ArrowDown className="h-3 w-3" />
+                  )}
+                  <span>{formatPercentage(Math.abs(summary.totalGainLossPercentage))}</span>
+                </div>
+              </div>
+              <div className={cn(
+                "p-3 rounded-2xl",
+                summary.totalGainLoss >= 0 
+                  ? "bg-emerald-500/20" 
+                  : "bg-red-500/20"
+              )}>
+                {summary.totalGainLoss >= 0 ? (
+                  <TrendingUp className="h-8 w-8 text-emerald-600 dark:text-emerald-400" />
+                ) : (
+                  <TrendingDown className="h-8 w-8 text-red-600 dark:text-red-400" />
+                )}
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="bg-gradient-to-br from-purple-500/10 to-purple-600/10 border-purple-500/20 hover:shadow-lg transition-all duration-300">
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div className="space-y-1">
+                <p className="text-sm font-medium text-muted-foreground">Total Positions</p>
+                <p className="text-3xl font-bold text-purple-600 dark:text-purple-400">
+                  {summary.count}
+                </p>
+                <p className="text-xs text-muted-foreground">Active investments</p>
+              </div>
+              <div className="p-3 bg-purple-500/20 rounded-2xl">
+                <PieChart className="h-8 w-8 text-purple-600 dark:text-purple-400" />
+              </div>
+            </div>
           </CardContent>
         </Card>
       </div>
 
-      <Card>
-        <CardHeader>
-          <div className="flex items-center justify-between">
-            <CardTitle>Investment Holdings</CardTitle>
-            <div className="flex items-center gap-2">
+      <Card className="shadow-lg border-muted/50">
+        <CardHeader className="border-b bg-gradient-to-r from-muted/30 to-muted/10">
+          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+            <div>
+              <CardTitle className="text-xl flex items-center gap-2">
+                <Sparkles className="h-5 w-5 text-primary" />
+                Investment Holdings
+              </CardTitle>
+              <p className="text-sm text-muted-foreground mt-1">
+                Monitor and manage your investment positions
+              </p>
+            </div>
+            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
               <div className="relative">
-                <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
                   placeholder="Search investments..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-8 w-[200px]"
+                  className="pl-9 w-full sm:w-[200px] h-9"
                 />
               </div>
               <Select value={filterType} onValueChange={setFilterType}>
-                <SelectTrigger className="w-[150px]">
+                <SelectTrigger className="w-full sm:w-[150px] h-9">
                   <Filter className="mr-2 h-4 w-4" />
                   <SelectValue placeholder="Filter by type" />
                 </SelectTrigger>
@@ -241,13 +297,16 @@ const Investments: React.FC = () => {
                   <SelectItem value="all">All Types</SelectItem>
                   {Object.entries(investmentTypeConfig).map(([value, config]) => (
                     <SelectItem key={value} value={value}>
-                      {config.label}
+                      <div className="flex items-center gap-2">
+                        <config.icon className="h-4 w-4" />
+                        {config.label}
+                      </div>
                     </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
               <Select value={sortBy} onValueChange={setSortBy}>
-                <SelectTrigger className="w-[150px]">
+                <SelectTrigger className="w-full sm:w-[150px] h-9">
                   <SelectValue placeholder="Sort by" />
                 </SelectTrigger>
                 <SelectContent>
@@ -260,32 +319,56 @@ const Investments: React.FC = () => {
             </div>
           </div>
         </CardHeader>
-        <CardContent>
+        <CardContent className="p-0">
           {isLoading ? (
-            <div className="flex items-center justify-center py-8">
-              <div className="text-muted-foreground">Loading investments...</div>
+            <div className="flex flex-col items-center justify-center py-16">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mb-4"></div>
+              <p className="text-muted-foreground">Loading your investments...</p>
             </div>
           ) : filteredInvestments.length === 0 ? (
-            <div className="text-center py-8 text-muted-foreground">
-              {searchTerm || filterType !== 'all'
-                ? 'No investments found matching your criteria'
-                : 'No investments yet. Start by adding your first investment.'}
+            <div className="flex flex-col items-center justify-center py-16">
+              <div className="p-4 bg-primary/10 rounded-full mb-4">
+                <PieChart className="h-12 w-12 text-primary" />
+              </div>
+              <h3 className="text-lg font-semibold mb-2">
+                {searchTerm || filterType !== 'all'
+                  ? 'No investments found'
+                  : 'No investments yet'}
+              </h3>
+              <p className="text-muted-foreground text-center max-w-sm">
+                {searchTerm || filterType !== 'all'
+                  ? 'Try adjusting your search or filters'
+                  : 'Start building your portfolio by adding your first investment'}
+              </p>
+              {!searchTerm && filterType === 'all' && (
+                <Button
+                  onClick={() => {
+                    setSelectedInvestment(null);
+                    setDialogOpen(true);
+                  }}
+                  className="mt-4"
+                >
+                  <Plus className="mr-2 h-4 w-4" />
+                  Add Your First Investment
+                </Button>
+              )}
             </div>
           ) : (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Investment</TableHead>
-                  <TableHead>Type</TableHead>
-                  <TableHead>Quantity</TableHead>
-                  <TableHead>Cost Basis</TableHead>
-                  <TableHead>Current Value</TableHead>
-                  <TableHead>Gain/Loss</TableHead>
-                  <TableHead>Purchase Date</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
+            <div className="overflow-x-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow className="hover:bg-transparent">
+                    <TableHead className="font-semibold">Investment</TableHead>
+                    <TableHead className="font-semibold">Type</TableHead>
+                    <TableHead className="font-semibold text-right">Quantity</TableHead>
+                    <TableHead className="font-semibold text-right">Cost Basis</TableHead>
+                    <TableHead className="font-semibold text-right">Current Value</TableHead>
+                    <TableHead className="font-semibold text-right">Gain/Loss</TableHead>
+                    <TableHead className="font-semibold">Purchase Date</TableHead>
+                    <TableHead className="text-right">Actions</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
                 {filteredInvestments.map((investment: Investment) => {
                   const totalValue = investment.quantity * investment.currentPrice;
                   const investedAmount = investment.quantity * investment.purchasePrice;
@@ -294,70 +377,102 @@ const Investments: React.FC = () => {
                   const typeConfig = investmentTypeConfig[investment.type];
 
                   return (
-                    <TableRow key={investment._id}>
+                    <TableRow key={investment._id} className="hover:bg-muted/50 transition-colors">
                       <TableCell>
-                        <div>
-                          <div className="font-medium">{investment.name}</div>
-                          {investment.symbol && (
-                            <div className="text-sm text-muted-foreground">{investment.symbol}</div>
-                          )}
+                        <div className="flex items-center gap-3">
+                          <div className={cn(
+                            "p-2 rounded-xl",
+                            `bg-gradient-to-br ${typeConfig.gradient}`
+                          )}>
+                            <typeConfig.icon className="h-4 w-4 text-foreground" />
+                          </div>
+                          <div>
+                            <div className="font-semibold">{investment.name}</div>
+                            {investment.symbol && (
+                              <div className="text-sm text-muted-foreground">{investment.symbol}</div>
+                            )}
+                          </div>
                         </div>
                       </TableCell>
                       <TableCell>
-                        <Badge variant="secondary" className={cn('gap-1', typeConfig.color)}>
+                        <Badge 
+                          variant="outline" 
+                          className={cn('gap-1.5 border', typeConfig.color)}
+                        >
+                          <typeConfig.icon className="h-3 w-3" />
                           {typeConfig.label}
                         </Badge>
                       </TableCell>
-                      <TableCell>{investment.quantity}</TableCell>
-                      <TableCell>
+                      <TableCell className="text-right font-medium">
+                        {investment.quantity}
+                      </TableCell>
+                      <TableCell className="text-right">
                         <div>
-                          <div>{formatCurrency(investedAmount)}</div>
+                          <div className="font-semibold">
+                            {formatDisplayCurrency(investedAmount)}
+                          </div>
                           <div className="text-sm text-muted-foreground">
                             @{formatCurrency(investment.purchasePrice)}
                           </div>
                         </div>
                       </TableCell>
-                      <TableCell>
+                      <TableCell className="text-right">
                         <div>
-                          <div>{formatCurrency(totalValue)}</div>
+                          <div className="font-semibold">
+                            {formatDisplayCurrency(totalValue)}
+                          </div>
                           <div className="text-sm text-muted-foreground">
                             @{formatCurrency(investment.currentPrice)}
                           </div>
                         </div>
                       </TableCell>
-                      <TableCell>
+                      <TableCell className="text-right">
                         <div className={cn(
-                          gainLoss >= 0 ? "text-green-600" : "text-red-600"
+                          "space-y-0.5",
+                          gainLoss >= 0 
+                            ? "text-emerald-600 dark:text-emerald-400" 
+                            : "text-red-600 dark:text-red-400"
                         )}>
-                          <div className="font-medium">
-                            {gainLoss >= 0 ? '+' : ''}{formatCurrency(gainLoss)}
+                          <div className="font-semibold flex items-center justify-end gap-1">
+                            {gainLoss >= 0 ? (
+                              <TrendingUp className="h-3 w-3" />
+                            ) : (
+                              <TrendingDown className="h-3 w-3" />
+                            )}
+                            {formatDisplayCurrency(Math.abs(gainLoss))}
                           </div>
-                          <div className="text-sm">
-                            {gainLoss >= 0 ? '+' : ''}{formatPercentage(gainLossPercentage)}
+                          <div className="text-sm font-medium">
+                            {gainLoss >= 0 ? '+' : '-'}{formatPercentage(Math.abs(gainLossPercentage))}
                           </div>
                         </div>
                       </TableCell>
                       <TableCell>
-                        {format(new Date(investment.purchaseDate), 'MMM d, yyyy')}
+                        <div className="text-sm">
+                          {format(new Date(investment.purchaseDate), 'MMM d, yyyy')}
+                        </div>
                       </TableCell>
                       <TableCell className="text-right">
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="icon">
+                            <Button 
+                              variant="ghost" 
+                              size="icon"
+                              className="h-8 w-8"
+                            >
                               <MoreVertical className="h-4 w-4" />
                             </Button>
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end">
                             <DropdownMenuItem onClick={() => handleEdit(investment)}>
                               <Edit className="mr-2 h-4 w-4" />
-                              Edit
+                              Edit Investment
                             </DropdownMenuItem>
                             <DropdownMenuItem
                               onClick={() => handleDelete(investment._id)}
-                              className="text-red-600"
+                              className="text-destructive"
                             >
                               <Trash2 className="mr-2 h-4 w-4" />
-                              Delete
+                              Delete Investment
                             </DropdownMenuItem>
                           </DropdownMenuContent>
                         </DropdownMenu>
@@ -365,8 +480,9 @@ const Investments: React.FC = () => {
                     </TableRow>
                   );
                 })}
-              </TableBody>
-            </Table>
+                </TableBody>
+              </Table>
+            </div>
           )}
         </CardContent>
       </Card>

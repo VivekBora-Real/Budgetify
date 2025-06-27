@@ -4,6 +4,12 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import {
   Plus,
   CreditCard,
   Wallet,
@@ -12,9 +18,16 @@ import {
   Edit,
   Trash2,
   Eye,
-  EyeOff
+  EyeOff,
+  MoreVertical,
+  TrendingUp,
+  Users,
+  Shield,
+  Smartphone,
+  Coins,
+  Sparkles
 } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import { cn, formatDisplayCurrency, formatCurrency } from '@/lib/utils';
 import api from '@/services/api';
 import AccountDialog from './components/AccountDialog';
 import { useToast } from '@/hooks/use-toast';
@@ -109,20 +122,15 @@ const Accounts: React.FC = () => {
     }
   };
 
-  const formatCurrency = (amount: number, currency: string = 'USD') => {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency,
-    }).format(amount);
-  };
+  // formatCurrency is now imported from utils
 
   const getAccountIcon = (type: string) => {
     const icons = {
       savings: Wallet,
       current: Building2,
       credit_card: CreditCard,
-      cash: DollarSign,
-      digital_wallet: CreditCard,
+      cash: Coins,
+      digital_wallet: Smartphone,
     };
     return icons[type as keyof typeof icons] || Wallet;
   };
@@ -135,87 +143,140 @@ const Accounts: React.FC = () => {
   };
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="p-6 space-y-8">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold">Accounts</h1>
-          <p className="text-muted-foreground">
-            Manage your financial accounts
+          <h1 className="text-3xl font-bold bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">
+            Accounts
+          </h1>
+          <p className="text-muted-foreground mt-1">
+            Track and manage all your financial accounts in one place
           </p>
         </div>
-        <Button onClick={() => {
-          setSelectedAccount(null);
-          setShowDialog(true);
-        }}>
+        <Button 
+          onClick={() => {
+            setSelectedAccount(null);
+            setShowDialog(true);
+          }}
+          className="bg-primary hover:bg-primary/90 shadow-lg hover:shadow-xl transition-all duration-200"
+        >
           <Plus className="h-4 w-4 mr-2" />
           Add Account
         </Button>
       </div>
 
       {/* Summary Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <Card>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <Card className="bg-gradient-to-br from-cyan-500/10 to-cyan-600/10 border-cyan-500/20 hover:shadow-lg transition-all duration-300">
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-muted-foreground">Total Balance</p>
-                <p className="text-2xl font-bold">
-                  {formatCurrency(summary.totalBalance)}
+              <div className="space-y-1">
+                <p className="text-sm font-medium text-muted-foreground">Total Balance</p>
+                <p className="text-3xl font-bold bg-gradient-to-r from-cyan-600 to-cyan-500 bg-clip-text text-transparent">
+                  {formatDisplayCurrency(summary.totalBalance)}
+                </p>
+                <div className="flex items-center gap-1 text-xs text-cyan-600 dark:text-cyan-400">
+                  <TrendingUp className="h-3 w-3" />
+                  <span>+12.5% from last month</span>
+                </div>
+              </div>
+              <div className="p-3 bg-cyan-500/20 rounded-2xl">
+                <DollarSign className="h-8 w-8 text-cyan-600 dark:text-cyan-400" />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+        <Card className="bg-gradient-to-br from-emerald-500/10 to-emerald-600/10 border-emerald-500/20 hover:shadow-lg transition-all duration-300">
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div className="space-y-1">
+                <p className="text-sm font-medium text-muted-foreground">Active Accounts</p>
+                <p className="text-3xl font-bold text-emerald-600 dark:text-emerald-400">
+                  {summary.activeAccounts}
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  {summary.totalAccounts - summary.activeAccounts} inactive
                 </p>
               </div>
-              <DollarSign className="h-8 w-8 text-blue-600 opacity-20" />
+              <div className="p-3 bg-emerald-500/20 rounded-2xl">
+                <Shield className="h-8 w-8 text-emerald-600 dark:text-emerald-400" />
+              </div>
             </div>
           </CardContent>
         </Card>
-        <Card>
+        <Card className="bg-gradient-to-br from-purple-500/10 to-purple-600/10 border-purple-500/20 hover:shadow-lg transition-all duration-300">
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-muted-foreground">Active Accounts</p>
-                <p className="text-2xl font-bold">{summary.activeAccounts}</p>
+              <div className="space-y-1">
+                <p className="text-sm font-medium text-muted-foreground">Total Accounts</p>
+                <p className="text-3xl font-bold text-purple-600 dark:text-purple-400">
+                  {summary.totalAccounts}
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  Across all categories
+                </p>
               </div>
-              <Wallet className="h-8 w-8 text-green-600 opacity-20" />
-            </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-muted-foreground">Total Accounts</p>
-                <p className="text-2xl font-bold">{summary.totalAccounts}</p>
+              <div className="p-3 bg-purple-500/20 rounded-2xl">
+                <Users className="h-8 w-8 text-purple-600 dark:text-purple-400" />
               </div>
-              <CreditCard className="h-8 w-8 text-purple-600 opacity-20" />
             </div>
           </CardContent>
         </Card>
       </div>
 
       {/* Filter */}
-      <div className="flex items-center gap-2">
+      <div className="flex items-center justify-between">
+        <h2 className="text-xl font-semibold flex items-center gap-2">
+          <Sparkles className="h-5 w-5 text-primary" />
+          Your Accounts
+        </h2>
         <Button
           variant="outline"
           size="sm"
           onClick={() => setShowInactive(!showInactive)}
+          className="hover:bg-primary/10 transition-all duration-200"
         >
           {showInactive ? <Eye className="h-4 w-4 mr-2" /> : <EyeOff className="h-4 w-4 mr-2" />}
-          {showInactive ? 'Showing All' : 'Showing Active Only'}
+          {showInactive ? 'Showing All' : 'Active Only'}
         </Button>
       </div>
 
       {/* Accounts Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {isLoading ? (
-          <Card className="col-span-full">
-            <CardContent className="p-8 text-center">
-              Loading accounts...
+          <Card className="col-span-full border-dashed">
+            <CardContent className="p-12 text-center">
+              <div className="flex flex-col items-center gap-4">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+                <p className="text-muted-foreground">Loading your accounts...</p>
+              </div>
             </CardContent>
           </Card>
         ) : accounts.length === 0 ? (
-          <Card className="col-span-full">
-            <CardContent className="p-8 text-center text-muted-foreground">
-              No accounts found. Create your first account to get started.
+          <Card className="col-span-full border-dashed bg-muted/5">
+            <CardContent className="p-12 text-center">
+              <div className="flex flex-col items-center gap-4">
+                <div className="p-4 bg-primary/10 rounded-full">
+                  <Wallet className="h-12 w-12 text-primary" />
+                </div>
+                <div className="space-y-2">
+                  <h3 className="text-lg font-semibold">No accounts yet</h3>
+                  <p className="text-muted-foreground max-w-sm mx-auto">
+                    Start tracking your finances by adding your first account
+                  </p>
+                </div>
+                <Button 
+                  onClick={() => {
+                    setSelectedAccount(null);
+                    setShowDialog(true);
+                  }}
+                  className="mt-2"
+                >
+                  <Plus className="h-4 w-4 mr-2" />
+                  Create Your First Account
+                </Button>
+              </div>
             </CardContent>
           </Card>
         ) : (
@@ -227,66 +288,97 @@ const Accounts: React.FC = () => {
               <Card 
                 key={account._id} 
                 className={cn(
-                  "relative overflow-hidden",
+                  "relative overflow-hidden group hover:shadow-xl transition-all duration-300 cursor-pointer",
+                  "border-muted/50 hover:border-primary/50",
                   !account.isActive && "opacity-60"
                 )}
+                style={{
+                  background: `linear-gradient(135deg, ${account.color}10 0%, transparent 100%)`
+                }}
               >
                 <div 
-                  className="absolute top-0 left-0 right-0 h-1"
+                  className="absolute top-0 left-0 right-0 h-1 group-hover:h-1.5 transition-all duration-300"
                   style={{ backgroundColor: account.color }}
                 />
-                <CardHeader className="flex flex-row items-center justify-between pb-2">
-                  <div className="flex items-center gap-3">
-                    <div 
-                      className="p-2 rounded-full"
-                      style={{ 
-                        backgroundColor: `${account.color}20`,
-                        color: account.color 
-                      }}
-                    >
-                      <Icon className="h-5 w-5" />
+                <CardHeader className="pb-3">
+                  <div className="flex items-start justify-between">
+                    <div className="flex items-start gap-3">
+                      <div 
+                        className="p-3 rounded-2xl shadow-sm group-hover:shadow-md transition-all duration-300"
+                        style={{ 
+                          backgroundColor: `${account.color}20`,
+                          color: account.color 
+                        }}
+                      >
+                        <Icon className="h-6 w-6" />
+                      </div>
+                      <div className="space-y-1">
+                        <CardTitle className="text-lg font-semibold">{account.name}</CardTitle>
+                        <div className="flex items-center gap-2">
+                          <Badge 
+                            variant="secondary" 
+                            className="text-xs"
+                            style={{
+                              backgroundColor: `${account.color}15`,
+                              color: account.color,
+                              borderColor: `${account.color}30`
+                            }}
+                          >
+                            {accountType?.label}
+                          </Badge>
+                          {!account.isActive && (
+                            <Badge variant="outline" className="text-xs">
+                              Inactive
+                            </Badge>
+                          )}
+                        </div>
+                      </div>
                     </div>
-                    <div>
-                      <CardTitle className="text-lg">{account.name}</CardTitle>
-                      <p className="text-sm text-muted-foreground">
-                        {accountType?.label}
-                      </p>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-1">
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => handleEdit(account)}
-                    >
-                      <Edit className="h-4 w-4" />
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => handleDelete(account._id)}
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+                        >
+                          <MoreVertical className="h-4 w-4" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        <DropdownMenuItem onClick={() => handleEdit(account)}>
+                          <Edit className="h-4 w-4 mr-2" />
+                          Edit Account
+                        </DropdownMenuItem>
+                        <DropdownMenuItem 
+                          onClick={() => handleDelete(account._id)}
+                          className="text-destructive"
+                        >
+                          <Trash2 className="h-4 w-4 mr-2" />
+                          Delete Account
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
                   </div>
                 </CardHeader>
-                <CardContent>
-                  <div className="space-y-3">
+                <CardContent className="pt-0">
+                  <div className="space-y-4">
                     <div>
-                      <p className="text-2xl font-bold">
-                        {formatCurrency(account.balance, account.currency)}
+                      <p className="text-3xl font-bold tracking-tight">
+                        {formatDisplayCurrency(account.balance, account.currency)}
                       </p>
-                      {!account.isActive && (
-                        <Badge variant="secondary" className="mt-1">
-                          Inactive
-                        </Badge>
-                      )}
+                      <p className="text-xs text-muted-foreground mt-1">
+                        Current Balance
+                      </p>
                     </div>
                     {account.description && (
-                      <p className="text-sm text-muted-foreground">
+                      <p className="text-sm text-muted-foreground line-clamp-2">
                         {account.description}
                       </p>
                     )}
+                    <div className="pt-3 border-t flex items-center justify-between text-xs text-muted-foreground">
+                      <span>Last updated</span>
+                      <span>{new Date(account.updatedAt).toLocaleDateString()}</span>
+                    </div>
                   </div>
                 </CardContent>
               </Card>
