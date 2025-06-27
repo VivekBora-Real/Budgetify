@@ -1,4 +1,5 @@
-import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
+import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
+import type { PayloadAction } from '@reduxjs/toolkit';
 import authService from '../../services/auth.service';
 import type { LoginCredentials, RegisterData, User, AuthTokens } from '../../types';
 
