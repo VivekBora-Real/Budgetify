@@ -7,8 +7,6 @@ import {
   Wallet,
   TrendingUp,
   Landmark,
-  Bell,
-  Shield,
   Menu,
   X,
   Moon,
@@ -29,8 +27,6 @@ const navigation = [
   { name: 'Accounts', href: '/accounts', icon: Wallet },
   { name: 'Investments', href: '/investments', icon: TrendingUp },
   { name: 'Loans', href: '/loans', icon: Landmark },
-  { name: 'Reminders', href: '/reminders', icon: Bell },
-  { name: 'Warranty', href: '/warranty', icon: Shield },
 ];
 
 const DashboardLayout: React.FC = () => {

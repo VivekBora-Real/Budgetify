@@ -24,8 +24,6 @@ import Transactions from './features/transactions/Transactions';
 import Accounts from './features/accounts/Accounts';
 import Investments from './features/investments/Investments';
 import Loans from './features/loans/Loans';
-import Reminders from './features/reminders/Reminders';
-import Warranty from './features/warranty/Warranty';
 
 // Create a client
 const queryClient = new QueryClient({
@@ -85,8 +83,6 @@ function AppContent() {
           <Route path="/accounts" element={<Accounts />} />
           <Route path="/investments" element={<Investments />} />
           <Route path="/loans" element={<Loans />} />
-          <Route path="/reminders" element={<Reminders />} />
-          <Route path="/warranty" element={<Warranty />} />
         </Route>
 
         {/* Catch all */}
