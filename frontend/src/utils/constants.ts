@@ -44,11 +44,11 @@ export const CURRENCIES = [
 ];
 
 export const COLORS = [
-  '#3b82f6', // blue
+  '#0ea5e9', // sky blue
   '#10b981', // green
   '#f59e0b', // amber
   '#ef4444', // red
-  '#8b5cf6', // purple
+  '#14b8a6', // teal
   '#ec4899', // pink
   '#06b6d4', // cyan
   '#f97316', // orange
