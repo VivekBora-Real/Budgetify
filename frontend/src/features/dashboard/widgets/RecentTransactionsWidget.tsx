@@ -3,7 +3,22 @@ import { useQuery } from '@tanstack/react-query';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { ArrowUpRight, ArrowDownRight, MoreVertical } from 'lucide-react';
+import { 
+  ArrowUpRight, 
+  ArrowDownRight, 
+  MoreVertical,
+  Receipt,
+  ShoppingBag,
+  Car,
+  Home,
+  Heart,
+  Gamepad2,
+  Briefcase,
+  Utensils,
+  Zap,
+  Activity,
+  ExternalLink
+} from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
 import { useNavigate } from 'react-router-dom';
@@ -48,26 +63,86 @@ const RecentTransactionsWidget: React.FC<RecentTransactionsProps> = () => {
     }).format(amount);
   };
 
-  const getCategoryColor = (category: string) => {
-    const colors: Record<string, string> = {
-      'Income': 'bg-green-100 text-green-800',
-      'Food & Dining': 'bg-orange-100 text-orange-800',
-      'Utilities': 'bg-blue-100 text-blue-800',
-      'Shopping': 'bg-purple-100 text-purple-800',
-      'Transportation': 'bg-yellow-100 text-yellow-800',
-      'Entertainment': 'bg-pink-100 text-pink-800',
-      'Healthcare': 'bg-red-100 text-red-800',
+  const getCategoryIcon = (category: string) => {
+    const icons: Record<string, any> = {
+      'Income': Briefcase,
+      'Food & Dining': Utensils,
+      'Shopping': ShoppingBag,
+      'Transportation': Car,
+      'Utilities': Zap,
+      'Entertainment': Gamepad2,
+      'Healthcare': Heart,
+      'Housing': Home,
+      'Other': Receipt,
     };
-    return colors[category] || 'bg-gray-100 text-gray-800';
+    return icons[category] || Receipt;
   };
 
+  const getCategoryStyle = (category: string) => {
+    const styles: Record<string, { bg: string; text: string; border: string }> = {
+      'Income': { 
+        bg: 'bg-green-50 dark:bg-green-950', 
+        text: 'text-green-700 dark:text-green-300',
+        border: 'border-green-200 dark:border-green-800'
+      },
+      'Food & Dining': { 
+        bg: 'bg-orange-50 dark:bg-orange-950', 
+        text: 'text-orange-700 dark:text-orange-300',
+        border: 'border-orange-200 dark:border-orange-800'
+      },
+      'Shopping': { 
+        bg: 'bg-purple-50 dark:bg-purple-950', 
+        text: 'text-purple-700 dark:text-purple-300',
+        border: 'border-purple-200 dark:border-purple-800'
+      },
+      'Transportation': { 
+        bg: 'bg-yellow-50 dark:bg-yellow-950', 
+        text: 'text-yellow-700 dark:text-yellow-300',
+        border: 'border-yellow-200 dark:border-yellow-800'
+      },
+      'Utilities': { 
+        bg: 'bg-blue-50 dark:bg-blue-950', 
+        text: 'text-blue-700 dark:text-blue-300',
+        border: 'border-blue-200 dark:border-blue-800'
+      },
+      'Entertainment': { 
+        bg: 'bg-pink-50 dark:bg-pink-950', 
+        text: 'text-pink-700 dark:text-pink-300',
+        border: 'border-pink-200 dark:border-pink-800'
+      },
+      'Healthcare': { 
+        bg: 'bg-red-50 dark:bg-red-950', 
+        text: 'text-red-700 dark:text-red-300',
+        border: 'border-red-200 dark:border-red-800'
+      },
+    };
+    return styles[category] || { 
+      bg: 'bg-gray-50 dark:bg-gray-950', 
+      text: 'text-gray-700 dark:text-gray-300',
+      border: 'border-gray-200 dark:border-gray-800'
+    };
+  };
+
+  const getRelativeTime = (date: string) => {
+    const now = new Date();
+    const transactionDate = new Date(date);
+    const diffInDays = Math.floor((now.getTime() - transactionDate.getTime()) / (1000 * 60 * 60 * 24));
+    
+    if (diffInDays === 0) return 'Today';
+    if (diffInDays === 1) return 'Yesterday';
+    if (diffInDays < 7) return `${diffInDays} days ago`;
+    return format(transactionDate, 'MMM d');
+  };
 
   if (isLoading) {
     return (
-      <Card className="h-full">
+      <Card className="h-full bg-gradient-to-br from-background to-muted/20 overflow-hidden">
         <CardContent className="p-6">
           <div className="flex items-center justify-center h-full">
-            Loading...
+            <div className="flex items-center gap-3">
+              <Activity className="h-5 w-5 animate-pulse text-primary" />
+              <span className="text-muted-foreground">Loading transactions...</span>
+            </div>
           </div>
         </CardContent>
       </Card>
@@ -75,81 +150,145 @@ const RecentTransactionsWidget: React.FC<RecentTransactionsProps> = () => {
   }
 
   return (
-    <Card className="h-full">
-      <CardHeader className="flex flex-row items-center justify-between">
-        <CardTitle>Recent Transactions</CardTitle>
-        <Button 
-          variant="ghost" 
-          size="sm"
-          onClick={() => navigate('/transactions')}
-        >
-          View All
-        </Button>
+    <Card className="h-full bg-gradient-to-br from-background to-muted/20 overflow-hidden">
+      <CardHeader className="pb-4">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <div className="p-2 bg-primary/10 rounded-lg">
+              <Receipt className="h-5 w-5 text-primary" />
+            </div>
+            <CardTitle className="text-lg font-semibold">Recent Transactions</CardTitle>
+          </div>
+          <Button 
+            variant="ghost" 
+            size="sm"
+            onClick={() => navigate('/transactions')}
+            className="hover:bg-primary/10 transition-colors"
+          >
+            View All
+            <ExternalLink className="h-3 w-3 ml-1" />
+          </Button>
+        </div>
       </CardHeader>
-      <CardContent>
-        <div className="space-y-4">
+      <CardContent className="px-6 pb-6">
+        <div className="space-y-3">
           {!transactions || transactions.length === 0 ? (
-            <div className="text-center py-8 text-muted-foreground">
-              No transactions yet. Start by adding your first transaction.
+            <div className="text-center py-12">
+              <div className="p-4 bg-muted/50 rounded-full w-fit mx-auto mb-4">
+                <Receipt className="h-8 w-8 text-muted-foreground" />
+              </div>
+              <p className="text-muted-foreground mb-3">No transactions yet</p>
+              <Button 
+                size="sm" 
+                onClick={() => navigate('/transactions')}
+                className="bg-primary/10 hover:bg-primary/20 text-primary"
+              >
+                Add your first transaction
+              </Button>
             </div>
           ) : (
-            transactions.map((transaction: Transaction) => (
-              <div
-                key={transaction._id}
-                className="flex items-center justify-between p-3 rounded-lg hover:bg-muted/50 transition-colors"
-              >
-                <div className="flex items-center gap-3">
-                  <div
-                    className={cn(
-                      'p-2 rounded-full',
-                      transaction.type === 'income' ? 'bg-green-100' : 'bg-red-100'
-                    )}
-                  >
-                    {transaction.type === 'income' ? (
-                      <ArrowDownRight className="h-4 w-4 text-green-600" />
-                    ) : (
-                      <ArrowUpRight className="h-4 w-4 text-red-600" />
-                    )}
-                  </div>
-                  <div className="space-y-1">
-                    <p className="font-medium text-sm">{transaction.description}</p>
-                    <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                      <Badge
-                        variant="secondary"
-                        className={cn('text-xs', getCategoryColor(transaction.category))}
-                      >
-                        {transaction.category}
-                      </Badge>
-                      <span>•</span>
-                      <span>{transaction.accountId.name}</span>
-                      <span>•</span>
-                      <span>{format(new Date(transaction.date), 'MMM d')}</span>
-                    </div>
-                  </div>
-                </div>
-                <div className="flex items-center gap-3">
-                  <div className="text-right">
-                    <p
+            transactions.map((transaction: Transaction) => {
+              const CategoryIcon = getCategoryIcon(transaction.category);
+              const categoryStyle = getCategoryStyle(transaction.category);
+              
+              return (
+                <div
+                  key={transaction._id}
+                  className="group flex items-center justify-between p-4 rounded-xl border transition-all duration-200 hover:shadow-md hover:border-primary/20 hover:-translate-y-0.5"
+                >
+                  <div className="flex items-center gap-4">
+                    <div
                       className={cn(
-                        'font-semibold',
-                        transaction.type === 'income' ? 'text-green-600' : 'text-red-600'
+                        'p-3 rounded-xl transition-transform group-hover:scale-110',
+                        transaction.type === 'income' 
+                          ? 'bg-gradient-to-br from-green-500 to-green-600' 
+                          : categoryStyle.bg
                       )}
                     >
-                      {transaction.type === 'income' ? '+' : '-'}
-                      {formatCurrency(transaction.amount)}
-                    </p>
-                    <Badge variant="default" className="text-xs">
-                      completed
-                    </Badge>
+                      {transaction.type === 'income' ? (
+                        <ArrowDownRight className="h-5 w-5 text-white" />
+                      ) : (
+                        <CategoryIcon className={cn('h-5 w-5', categoryStyle.text)} />
+                      )}
+                    </div>
+                    <div className="space-y-1">
+                      <p className="font-medium line-clamp-1">{transaction.description}</p>
+                      <div className="flex items-center gap-2 text-xs">
+                        <Badge
+                          variant="outline"
+                          className={cn(
+                            'text-xs border',
+                            categoryStyle.border,
+                            categoryStyle.text,
+                            categoryStyle.bg
+                          )}
+                        >
+                          {transaction.category}
+                        </Badge>
+                        <span className="text-muted-foreground">•</span>
+                        <span className="text-muted-foreground flex items-center gap-1">
+                          <div 
+                            className="w-2 h-2 rounded-full" 
+                            style={{ backgroundColor: transaction.accountId.color || '#6366f1' }} 
+                          />
+                          {transaction.accountId.name}
+                        </span>
+                        {transaction.isRecurring && (
+                          <>
+                            <span className="text-muted-foreground">•</span>
+                            <Badge variant="secondary" className="text-xs">
+                              Recurring
+                            </Badge>
+                          </>
+                        )}
+                      </div>
+                    </div>
                   </div>
-                  <Button variant="ghost" size="icon" className="h-8 w-8">
-                    <MoreVertical className="h-4 w-4" />
-                  </Button>
+                  <div className="flex items-center gap-3">
+                    <div className="text-right">
+                      <p
+                        className={cn(
+                          'font-bold text-lg',
+                          transaction.type === 'income' 
+                            ? 'text-green-600 dark:text-green-400' 
+                            : 'text-gray-900 dark:text-gray-100'
+                        )}
+                      >
+                        {transaction.type === 'income' ? '+' : '-'}
+                        {formatCurrency(transaction.amount)}
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        {getRelativeTime(transaction.date)}
+                      </p>
+                    </div>
+                    <Button 
+                      variant="ghost" 
+                      size="icon" 
+                      className="h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity"
+                    >
+                      <MoreVertical className="h-4 w-4" />
+                    </Button>
+                  </div>
                 </div>
-              </div>
-            ))
+              );
+            })
           )}
         </div>
+        
+        {transactions && transactions.length > 0 && (
+          <div className="mt-4 pt-4 border-t">
+            <Button 
+              variant="ghost" 
+              className="w-full hover:bg-primary/5"
+              onClick={() => navigate('/transactions')}
+            >
+              <span className="text-sm text-muted-foreground">
+                View all transactions
+              </span>
+              <ArrowUpRight className="h-3 w-3 ml-2 text-muted-foreground" />
+            </Button>
+          </div>
+        )}
       </CardContent>
     </Card>
   );
