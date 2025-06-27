@@ -10,7 +10,6 @@ import {
   Shield,
   Receipt,
   Activity,
-  ArrowRight,
   Bell,
   TrendingUp,
   Repeat,
@@ -19,14 +18,12 @@ import {
 import { cn } from '@/lib/utils';
 import { format, differenceInDays, isToday, isTomorrow } from 'date-fns';
 import dashboardService, { UpcomingBill } from '@/services/dashboard.service';
-import { useNavigate } from 'react-router-dom';
 
 interface UpcomingBillsProps {
   bills?: UpcomingBill[];
 }
 
 const UpcomingBillsWidget: React.FC<UpcomingBillsProps> = () => {
-  const navigate = useNavigate();
   const { data: bills, isLoading } = useQuery({
     queryKey: ['dashboard-upcoming-bills'],
     queryFn: () => dashboardService.getUpcomingBills(),

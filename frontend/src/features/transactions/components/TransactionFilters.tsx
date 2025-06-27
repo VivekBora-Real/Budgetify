@@ -31,7 +31,6 @@ const TransactionFilters: React.FC<TransactionFiltersProps> = ({
   className,
 }) => {
   // Add accounts fetching if needed
-  const [accounts, setAccounts] = React.useState<any[]>([]);
   const handleFilterChange = (key: string, value: string) => {
     onFiltersChange({
       ...filters,

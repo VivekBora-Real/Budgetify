@@ -38,7 +38,6 @@ import {
   DollarSign,
   PieChart,
   BarChart3,
-  Building2,
   Bitcoin,
   LineChart,
   Home,

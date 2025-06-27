@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -17,7 +17,6 @@ import {
   Edit,
   Trash2,
   Receipt,
-  Wallet,
   MoreVertical,
   ChevronLeft,
   ChevronRight,
@@ -38,7 +37,7 @@ import {
   ArrowUpRight
 } from 'lucide-react';
 import { format } from 'date-fns';
-import { cn, formatDisplayCurrency, formatCurrency } from '@/lib/utils';
+import { cn } from '@/lib/utils';
 import api from '@/services/api';
 import TransactionDialog from './components/TransactionDialog';
 import TransactionFilters from './components/TransactionFilters';
@@ -109,7 +108,7 @@ const Transactions: React.FC = () => {
   }, [debouncedSearchTerm]);
 
   // Fetch transactions with debouncing for search
-  const { data: transactionsData, isLoading } = useQuery({
+  const { data: transactionsData, isLoading } = useQuery<{ data: Transaction[]; pagination: any }>({
     queryKey: ['transactions', { 
       page: currentPage, 
       search: debouncedSearchTerm,
@@ -133,7 +132,7 @@ const Transactions: React.FC = () => {
       return response.data;
     },
     staleTime: 2 * 60 * 1000, // 2 minutes
-    keepPreviousData: true,
+    placeholderData: (previousData) => previousData,
   });
 
   // Fetch transaction stats
@@ -318,9 +317,6 @@ const Transactions: React.FC = () => {
     transactionCount: 0,
     categoryBreakdown: [],
   };
-  
-  // For export functionality - use displayed transactions
-  const filteredTransactions = transactions;
 
   return (
     <div className="p-6 space-y-6 animate-fade-in">

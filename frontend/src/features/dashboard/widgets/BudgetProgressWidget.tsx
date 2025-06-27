@@ -3,14 +3,12 @@ import { useQuery } from '@tanstack/react-query';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
 import { 
   AlertCircle, 
   CheckCircle, 
   TrendingUp,
   Target,
   Wallet,
-  ArrowRight,
   Activity,
   Sparkles,
   Info,
@@ -22,7 +20,6 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import dashboardService from '@/services/dashboard.service';
-import { useNavigate } from 'react-router-dom';
 
 interface BudgetItem {
   category: string;
@@ -38,7 +35,6 @@ interface BudgetProgressProps {
 }
 
 const BudgetProgressWidget: React.FC<BudgetProgressProps> = () => {
-  const navigate = useNavigate();
   const { data: budgets, isLoading } = useQuery({
     queryKey: ['dashboard-budget-progress'],
     queryFn: () => dashboardService.getBudgetProgress(),

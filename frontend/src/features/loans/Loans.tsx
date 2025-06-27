@@ -32,7 +32,6 @@ import {
   Search,
   Filter,
   Calendar,
-  TrendingDown,
   CreditCard,
   MoreVertical,
   Edit,
@@ -52,7 +51,7 @@ import {
   Calculator
 } from 'lucide-react';
 import { format, differenceInDays } from 'date-fns';
-import { cn, formatDisplayCurrency, formatCurrency } from '@/lib/utils';
+import { cn, formatDisplayCurrency } from '@/lib/utils';
 import loanService, { Loan, LoanQueryParams, RecordPaymentDto } from '@/services/loan.service';
 import LoanDialog from './components/LoanDialog';
 

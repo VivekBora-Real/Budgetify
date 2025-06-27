@@ -27,7 +27,7 @@ import {
   Coins,
   Sparkles
 } from 'lucide-react';
-import { cn, formatDisplayCurrency, formatCurrency } from '@/lib/utils';
+import { cn, formatDisplayCurrency } from '@/lib/utils';
 import api from '@/services/api';
 import AccountDialog from './components/AccountDialog';
 import { useToast } from '@/hooks/use-toast';
