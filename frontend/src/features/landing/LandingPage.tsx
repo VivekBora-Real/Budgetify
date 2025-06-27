@@ -69,7 +69,7 @@ const LandingPage: React.FC = () => {
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
           <div className="flex items-center space-x-2">
             <DollarSign className="h-8 w-8 text-primary" />
-            <span className="text-2xl font-bold">BudgetApp</span>
+            <span className="text-2xl font-bold">Budgetify</span>
           </div>
           
           <div className="flex items-center space-x-4">
@@ -148,7 +148,7 @@ const LandingPage: React.FC = () => {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
             <div>
               <h2 className="text-3xl font-bold mb-6">
-                Why Choose BudgetApp?
+                Why Choose Budgetify?
               </h2>
               <p className="text-lg text-muted-foreground mb-8">
                 Join thousands of users who have transformed their financial lives with our 
@@ -186,7 +186,7 @@ const LandingPage: React.FC = () => {
             Ready to Take Control?
           </h2>
           <p className="text-lg text-muted-foreground mb-8 max-w-2xl mx-auto">
-            Join BudgetApp today and start your journey towards better financial management. 
+            Join Budgetify today and start your journey towards better financial management. 
             It's free, secure, and takes less than a minute to get started.
           </p>
           <Link to="/register">
@@ -201,7 +201,7 @@ const LandingPage: React.FC = () => {
       {/* Footer */}
       <footer className="border-t py-8 px-4">
         <div className="container mx-auto text-center text-sm text-muted-foreground">
-          <p>&copy; 2024 BudgetApp. All rights reserved.</p>
+          <p>&copy; 2024 Budgetify. All rights reserved.</p>
         </div>
       </footer>
     </div>

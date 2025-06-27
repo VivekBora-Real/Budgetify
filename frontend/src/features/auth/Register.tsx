@@ -64,7 +64,7 @@ const Register: React.FC = () => {
       <CardHeader className="space-y-1">
         <CardTitle className="text-2xl">Create an account</CardTitle>
         <CardDescription>
-          Enter your information to create your BudgetApp account
+          Enter your information to create your Budgetify account
         </CardDescription>
       </CardHeader>
       <div className="px-6 pb-2">

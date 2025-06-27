@@ -56,7 +56,7 @@ const DashboardLayout: React.FC = () => {
           <div className="flex h-16 items-center justify-between px-4 border-b">
             <Link to="/dashboard" className="flex items-center space-x-2">
               <DollarSign className="h-8 w-8 text-primary" />
-              <span className="text-xl font-bold">BudgetApp</span>
+              <span className="text-xl font-bold">Budgetify</span>
             </Link>
             <Button
               variant="ghost"

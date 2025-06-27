@@ -16,7 +16,7 @@ const AuthLayout: React.FC = () => {
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
           <Link to="/" className="flex items-center space-x-2">
             <DollarSign className="h-8 w-8 text-primary" />
-            <span className="text-2xl font-bold">BudgetApp</span>
+            <span className="text-2xl font-bold">Budgetify</span>
           </Link>
           
           <Button
@@ -42,7 +42,7 @@ const AuthLayout: React.FC = () => {
 
       {/* Footer */}
       <footer className="border-t py-4 text-center text-sm text-muted-foreground">
-        <p>&copy; 2024 BudgetApp. All rights reserved.</p>
+        <p>&copy; 2024 Budgetify. All rights reserved.</p>
       </footer>
     </div>
   );
