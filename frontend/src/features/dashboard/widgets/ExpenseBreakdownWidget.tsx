@@ -77,8 +77,9 @@ const ExpenseBreakdownWidget: React.FC<ExpenseBreakdownProps> = ({
             No expenses recorded this month
           </div>
         ) : (
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <div className="h-64">
+          <div className="space-y-6">
+            {/* Pie Chart */}
+            <div className="h-64 relative">
               <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
                   <Pie
@@ -97,11 +98,15 @@ const ExpenseBreakdownWidget: React.FC<ExpenseBreakdownProps> = ({
                   <Tooltip content={<CustomTooltip />} />
                 </PieChart>
               </ResponsiveContainer>
-              <div className="text-center -mt-40">
-                <p className="text-sm text-muted-foreground">Total</p>
-                <p className="text-2xl font-bold">{formatCurrency(totalExpenses)}</p>
+              <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                <div className="text-center">
+                  <p className="text-sm text-muted-foreground">Total</p>
+                  <p className="text-2xl font-bold">{formatCurrency(totalExpenses)}</p>
+                </div>
               </div>
             </div>
+            
+            {/* Category List */}
             <div className="space-y-3">
               {data.map((category, index) => (
                 <div key={index} className="space-y-2">
