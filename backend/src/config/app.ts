@@ -15,11 +15,14 @@ const createApp = (): Application => {
   // Security middleware
   app.use(helmet());
   
-  // CORS configuration
+  // CORS configuration - Allow all origins
   app.use(cors({
-    origin: process.env.FRONTEND_URL || 'http://localhost:3000',
+    origin: true, // Allow all origins
     credentials: true,
-    optionsSuccessStatus: 200
+    optionsSuccessStatus: 200,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept'],
+    exposedHeaders: ['Content-Length', 'X-Request-Id'],
   }));
   
   // Compression middleware
@@ -39,6 +42,9 @@ const createApp = (): Application => {
   // Body parsing middleware
   app.use(express.json({ limit: '10mb' }));
   app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+  
+  // Handle preflight requests
+  app.options('*', cors());
   
   // Health check endpoint
   app.get('/health', (_req, res) => {
