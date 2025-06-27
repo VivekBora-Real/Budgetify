@@ -1,0 +1,19 @@
+{
+  "name": "Budgetify - Smart Personal Finance Management",
+  "short_name": "Budgetify",
+  "description": "Track expenses, manage budgets, and achieve your financial goals with Budgetify",
+  "theme_color": "#3b82f6",
+  "background_color": "#ffffff",
+  "display": "standalone",
+  "orientation": "portrait",
+  "scope": "/",
+  "start_url": "/",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
