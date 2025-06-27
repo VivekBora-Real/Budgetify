@@ -11,11 +11,30 @@ import {
   Download,
   ArrowUpDown,
   Calendar,
-  DollarSign,
   TrendingUp,
   TrendingDown,
   Edit,
-  Trash2
+  Trash2,
+  Receipt,
+  Wallet,
+  MoreVertical,
+  ChevronLeft,
+  ChevronRight,
+  FileText,
+  Tag,
+  Clock,
+  ShoppingBag,
+  Car,
+  Home,
+  Heart,
+  Gamepad2,
+  Briefcase,
+  Utensils,
+  Zap,
+  Activity,
+  PiggyBank,
+  ArrowDownRight,
+  ArrowUpRight
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
@@ -23,6 +42,13 @@ import api from '@/services/api';
 import TransactionDialog from './components/TransactionDialog';
 import TransactionFilters from './components/TransactionFilters';
 import { useToast } from '@/hooks/use-toast';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+  DropdownMenuSeparator,
+} from '@/components/ui/dropdown-menu';
 
 interface Transaction {
   _id: string;
@@ -161,6 +187,66 @@ const Transactions: React.FC = () => {
     }).format(amount);
   };
 
+  const getCategoryIcon = (category: string) => {
+    const icons: Record<string, any> = {
+      'Income': Briefcase,
+      'Food & Dining': Utensils,
+      'Shopping': ShoppingBag,
+      'Transportation': Car,
+      'Utilities': Zap,
+      'Entertainment': Gamepad2,
+      'Healthcare': Heart,
+      'Housing': Home,
+      'Other': Receipt,
+    };
+    return icons[category] || Receipt;
+  };
+
+  const getCategoryColor = (category: string) => {
+    const colors: Record<string, { bg: string; text: string; border: string }> = {
+      'Income': { 
+        bg: 'bg-green-50 dark:bg-green-950', 
+        text: 'text-green-700 dark:text-green-300',
+        border: 'border-green-200 dark:border-green-800'
+      },
+      'Food & Dining': { 
+        bg: 'bg-orange-50 dark:bg-orange-950', 
+        text: 'text-orange-700 dark:text-orange-300',
+        border: 'border-orange-200 dark:border-orange-800'
+      },
+      'Shopping': { 
+        bg: 'bg-purple-50 dark:bg-purple-950', 
+        text: 'text-purple-700 dark:text-purple-300',
+        border: 'border-purple-200 dark:border-purple-800'
+      },
+      'Transportation': { 
+        bg: 'bg-yellow-50 dark:bg-yellow-950', 
+        text: 'text-yellow-700 dark:text-yellow-300',
+        border: 'border-yellow-200 dark:border-yellow-800'
+      },
+      'Utilities': { 
+        bg: 'bg-blue-50 dark:bg-blue-950', 
+        text: 'text-blue-700 dark:text-blue-300',
+        border: 'border-blue-200 dark:border-blue-800'
+      },
+      'Entertainment': { 
+        bg: 'bg-pink-50 dark:bg-pink-950', 
+        text: 'text-pink-700 dark:text-pink-300',
+        border: 'border-pink-200 dark:border-pink-800'
+      },
+      'Healthcare': { 
+        bg: 'bg-red-50 dark:bg-red-950', 
+        text: 'text-red-700 dark:text-red-300',
+        border: 'border-red-200 dark:border-red-800'
+      },
+    };
+    return colors[category] || { 
+      bg: 'bg-gray-50 dark:bg-gray-950', 
+      text: 'text-gray-700 dark:text-gray-300',
+      border: 'border-gray-200 dark:border-gray-800'
+    };
+  };
+
   const transactions = transactionsData?.data || [];
   const pagination = transactionsData?.pagination;
   const stats = statsData || {
@@ -172,102 +258,143 @@ const Transactions: React.FC = () => {
   };
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="p-6 space-y-6 animate-fade-in">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold">Transactions</h1>
-          <p className="text-muted-foreground">
-            Manage your income and expenses
+          <h1 className="text-3xl font-bold bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">
+            Transactions
+          </h1>
+          <p className="text-muted-foreground mt-1">
+            Track and manage your financial activities
           </p>
         </div>
-        <Button onClick={() => {
-          setSelectedTransaction(null);
-          setShowDialog(true);
-        }}>
-          <Plus className="h-4 w-4 mr-2" />
+        <Button 
+          size="lg"
+          className="shadow-lg hover:shadow-xl transition-all duration-200"
+          onClick={() => {
+            setSelectedTransaction(null);
+            setShowDialog(true);
+          }}
+        >
+          <Plus className="h-5 w-5 mr-2" />
           Add Transaction
         </Button>
       </div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <Card>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <Card className="bg-gradient-to-br from-green-50 to-green-100 dark:from-green-950/20 dark:to-green-900/20 border-green-200 dark:border-green-800 overflow-hidden group hover:shadow-lg transition-all duration-300">
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-muted-foreground">Total Income</p>
-                <p className="text-2xl font-bold text-green-600">
+              <div className="space-y-1">
+                <p className="text-sm font-medium text-green-700 dark:text-green-300">Total Income</p>
+                <p className="text-2xl font-bold text-green-900 dark:text-green-100">
                   {formatCurrency(stats.totalIncome)}
                 </p>
+                <div className="flex items-center gap-1 text-xs text-green-600 dark:text-green-400">
+                  <TrendingUp className="h-3 w-3" />
+                  <span>+12.5% from last month</span>
+                </div>
               </div>
-              <TrendingUp className="h-8 w-8 text-green-600 opacity-20" />
+              <div className="p-3 bg-green-500 rounded-xl opacity-20 group-hover:opacity-30 transition-opacity">
+                <ArrowDownRight className="h-8 w-8 text-green-900" />
+              </div>
             </div>
           </CardContent>
         </Card>
-        <Card>
+
+        <Card className="bg-gradient-to-br from-red-50 to-red-100 dark:from-red-950/20 dark:to-red-900/20 border-red-200 dark:border-red-800 overflow-hidden group hover:shadow-lg transition-all duration-300">
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-muted-foreground">Total Expense</p>
-                <p className="text-2xl font-bold text-red-600">
+              <div className="space-y-1">
+                <p className="text-sm font-medium text-red-700 dark:text-red-300">Total Expenses</p>
+                <p className="text-2xl font-bold text-red-900 dark:text-red-100">
                   {formatCurrency(stats.totalExpense)}
                 </p>
+                <div className="flex items-center gap-1 text-xs text-red-600 dark:text-red-400">
+                  <TrendingDown className="h-3 w-3" />
+                  <span>-5.2% from last month</span>
+                </div>
               </div>
-              <TrendingDown className="h-8 w-8 text-red-600 opacity-20" />
+              <div className="p-3 bg-red-500 rounded-xl opacity-20 group-hover:opacity-30 transition-opacity">
+                <ArrowUpRight className="h-8 w-8 text-red-900" />
+              </div>
             </div>
           </CardContent>
         </Card>
-        <Card>
+
+        <Card className="bg-gradient-to-br from-primary/10 to-primary/20 border-primary/30 overflow-hidden group hover:shadow-lg transition-all duration-300">
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-muted-foreground">Net Amount</p>
+              <div className="space-y-1">
+                <p className="text-sm font-medium text-primary">Net Balance</p>
                 <p className={cn(
                   "text-2xl font-bold",
-                  stats.netAmount >= 0 ? "text-green-600" : "text-red-600"
+                  stats.netAmount >= 0 ? "text-green-600 dark:text-green-400" : "text-red-600 dark:text-red-400"
                 )}>
                   {formatCurrency(stats.netAmount)}
                 </p>
+                <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                  <PiggyBank className="h-3 w-3" />
+                  <span>Savings this month</span>
+                </div>
               </div>
-              <DollarSign className="h-8 w-8 text-blue-600 opacity-20" />
+              <div className="p-3 bg-primary rounded-xl opacity-20 group-hover:opacity-30 transition-opacity">
+                <Wallet className="h-8 w-8 text-primary" />
+              </div>
             </div>
           </CardContent>
         </Card>
-        <Card>
+
+        <Card className="bg-gradient-to-br from-purple-50 to-purple-100 dark:from-purple-950/20 dark:to-purple-900/20 border-purple-200 dark:border-purple-800 overflow-hidden group hover:shadow-lg transition-all duration-300">
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-muted-foreground">Transactions</p>
-                <p className="text-2xl font-bold">{stats.transactionCount}</p>
+              <div className="space-y-1">
+                <p className="text-sm font-medium text-purple-700 dark:text-purple-300">Total Transactions</p>
+                <p className="text-2xl font-bold text-purple-900 dark:text-purple-100">
+                  {stats.transactionCount}
+                </p>
+                <div className="flex items-center gap-1 text-xs text-purple-600 dark:text-purple-400">
+                  <Activity className="h-3 w-3" />
+                  <span>This month</span>
+                </div>
               </div>
-              <Calendar className="h-8 w-8 text-purple-600 opacity-20" />
+              <div className="p-3 bg-purple-500 rounded-xl opacity-20 group-hover:opacity-30 transition-opacity">
+                <Receipt className="h-8 w-8 text-purple-900" />
+              </div>
             </div>
           </CardContent>
         </Card>
       </div>
 
       {/* Filters and Search */}
-      <Card>
-        <CardContent className="p-4">
+      <Card className="border-0 shadow-lg bg-gradient-to-br from-background to-muted/20">
+        <CardContent className="p-6">
           <div className="flex flex-col md:flex-row gap-4">
             <div className="flex-1 relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
-                placeholder="Search transactions..."
+                placeholder="Search by description, category, or amount..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10"
+                className="pl-10 bg-background/50 border-muted-foreground/20 focus:bg-background transition-colors"
               />
             </div>
             <Button
-              variant="outline"
+              variant={showFilters ? 'secondary' : 'outline'}
               onClick={() => setShowFilters(!showFilters)}
+              className="min-w-[120px]"
             >
               <Filter className="h-4 w-4 mr-2" />
               Filters
+              {Object.values(filters).filter(Boolean).length > 0 && (
+                <Badge variant="secondary" className="ml-2">
+                  {Object.values(filters).filter(Boolean).length}
+                </Badge>
+              )}
             </Button>
-            <Button variant="outline">
+            <Button variant="outline" className="min-w-[120px]">
               <Download className="h-4 w-4 mr-2" />
               Export
             </Button>
@@ -277,154 +404,260 @@ const Transactions: React.FC = () => {
             <TransactionFilters
               filters={filters}
               onFiltersChange={setFilters}
-              className="mt-4"
+              className="mt-6 p-4 bg-muted/50 rounded-lg"
             />
           )}
         </CardContent>
       </Card>
 
-      {/* Transactions Table */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Transaction History</CardTitle>
+      {/* Transactions List */}
+      <Card className="border-0 shadow-lg overflow-hidden">
+        <CardHeader className="bg-gradient-to-r from-primary/5 to-primary/10 border-b">
+          <div className="flex items-center justify-between">
+            <CardTitle className="flex items-center gap-2">
+              <FileText className="h-5 w-5 text-primary" />
+              Transaction History
+            </CardTitle>
+            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+              <span>Sort by:</span>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => handleSort('date')}
+                className={cn(sortBy === 'date' && 'text-primary')}
+              >
+                Date
+                <ArrowUpDown className="h-3 w-3 ml-1" />
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => handleSort('amount')}
+                className={cn(sortBy === 'amount' && 'text-primary')}
+              >
+                Amount
+                <ArrowUpDown className="h-3 w-3 ml-1" />
+              </Button>
+            </div>
+          </div>
         </CardHeader>
-        <CardContent>
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead>
-                <tr className="border-b">
-                  <th 
-                    className="text-left p-2 cursor-pointer hover:bg-muted/50"
-                    onClick={() => handleSort('date')}
+        <CardContent className="p-0">
+          {isLoading ? (
+            <div className="flex items-center justify-center p-12">
+              <div className="flex items-center gap-3">
+                <Activity className="h-6 w-6 animate-pulse text-primary" />
+                <span className="text-muted-foreground">Loading transactions...</span>
+              </div>
+            </div>
+          ) : transactions.length === 0 ? (
+            <div className="text-center p-12">
+              <div className="p-4 bg-muted/50 rounded-full w-fit mx-auto mb-4">
+                <Receipt className="h-12 w-12 text-muted-foreground" />
+              </div>
+              <p className="text-lg font-medium text-muted-foreground mb-2">No transactions found</p>
+              <p className="text-sm text-muted-foreground mb-4">
+                {searchTerm || Object.values(filters).some(Boolean) 
+                  ? 'Try adjusting your search or filters'
+                  : 'Start by adding your first transaction'}
+              </p>
+              {!searchTerm && !Object.values(filters).some(Boolean) && (
+                <Button onClick={() => {
+                  setSelectedTransaction(null);
+                  setShowDialog(true);
+                }}>
+                  <Plus className="h-4 w-4 mr-2" />
+                  Add First Transaction
+                </Button>
+              )}
+            </div>
+          ) : (
+            <div className="divide-y">
+              {transactions.map((transaction: Transaction) => {
+                const CategoryIcon = getCategoryIcon(transaction.category);
+                const categoryStyle = getCategoryColor(transaction.category);
+                
+                return (
+                  <div
+                    key={transaction._id}
+                    className="group hover:bg-muted/50 transition-all duration-200"
                   >
-                    <div className="flex items-center gap-2">
-                      Date
-                      <ArrowUpDown className="h-4 w-4" />
-                    </div>
-                  </th>
-                  <th className="text-left p-2">Description</th>
-                  <th className="text-left p-2">Category</th>
-                  <th className="text-left p-2">Account</th>
-                  <th 
-                    className="text-right p-2 cursor-pointer hover:bg-muted/50"
-                    onClick={() => handleSort('amount')}
-                  >
-                    <div className="flex items-center justify-end gap-2">
-                      Amount
-                      <ArrowUpDown className="h-4 w-4" />
-                    </div>
-                  </th>
-                  <th className="text-center p-2">Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {isLoading ? (
-                  <tr>
-                    <td colSpan={6} className="text-center p-8">
-                      Loading transactions...
-                    </td>
-                  </tr>
-                ) : transactions.length === 0 ? (
-                  <tr>
-                    <td colSpan={6} className="text-center p-8 text-muted-foreground">
-                      No transactions found
-                    </td>
-                  </tr>
-                ) : (
-                  transactions.map((transaction: Transaction) => (
-                    <tr key={transaction._id} className="border-b hover:bg-muted/50">
-                      <td className="p-2">
-                        <div>
-                          <p className="font-medium">
-                            {format(new Date(transaction.date), 'MMM d, yyyy')}
-                          </p>
-                          <p className="text-xs text-muted-foreground">
-                            {format(new Date(transaction.date), 'EEEE')}
-                          </p>
-                        </div>
-                      </td>
-                      <td className="p-2">
-                        <div>
-                          <p className="font-medium">{transaction.description}</p>
-                          {transaction.tags.length > 0 && (
-                            <div className="flex gap-1 mt-1">
-                              {transaction.tags.map((tag, index) => (
-                                <Badge key={index} variant="secondary" className="text-xs">
-                                  {tag}
-                                </Badge>
-                              ))}
+                    <div className="p-4 lg:p-6">
+                      <div className="flex items-center gap-4">
+                        {/* Icon and Type Indicator */}
+                        <div className="relative">
+                          <div className={cn(
+                            "p-3 rounded-xl transition-transform group-hover:scale-110",
+                            transaction.type === 'income' 
+                              ? 'bg-gradient-to-br from-green-500 to-green-600' 
+                              : categoryStyle.bg
+                          )}>
+                            {transaction.type === 'income' ? (
+                              <ArrowDownRight className="h-5 w-5 text-white" />
+                            ) : (
+                              <CategoryIcon className={cn('h-5 w-5', categoryStyle.text)} />
+                            )}
+                          </div>
+                          {transaction.isRecurring && (
+                            <div className="absolute -top-1 -right-1 p-1 bg-primary rounded-full">
+                              <Clock className="h-3 w-3 text-primary-foreground" />
                             </div>
                           )}
                         </div>
-                      </td>
-                      <td className="p-2">
-                        <Badge variant="outline">{transaction.category}</Badge>
-                      </td>
-                      <td className="p-2">
-                        <div className="flex items-center gap-2">
-                          <div 
-                            className="w-3 h-3 rounded-full"
-                            style={{ backgroundColor: transaction.accountId.color }}
-                          />
-                          <span className="text-sm">{transaction.accountId.name}</span>
+
+                        {/* Transaction Details */}
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-start justify-between gap-4">
+                            <div className="space-y-1">
+                              <p className="font-medium text-base line-clamp-1">
+                                {transaction.description}
+                              </p>
+                              <div className="flex items-center gap-3 text-sm text-muted-foreground">
+                                <Badge
+                                  variant="outline"
+                                  className={cn(
+                                    'text-xs border',
+                                    categoryStyle.border,
+                                    categoryStyle.text,
+                                    categoryStyle.bg
+                                  )}
+                                >
+                                  {transaction.category}
+                                </Badge>
+                                <span className="flex items-center gap-1.5">
+                                  <div 
+                                    className="w-2 h-2 rounded-full" 
+                                    style={{ backgroundColor: transaction.accountId.color || '#6366f1' }} 
+                                  />
+                                  {transaction.accountId.name}
+                                </span>
+                                <span className="flex items-center gap-1">
+                                  <Calendar className="h-3 w-3" />
+                                  {format(new Date(transaction.date), 'MMM d, yyyy')}
+                                </span>
+                              </div>
+                              {transaction.tags.length > 0 && (
+                                <div className="flex items-center gap-1.5 pt-1">
+                                  <Tag className="h-3 w-3 text-muted-foreground" />
+                                  {transaction.tags.map((tag, index) => (
+                                    <Badge key={index} variant="secondary" className="text-xs">
+                                      {tag}
+                                    </Badge>
+                                  ))}
+                                </div>
+                              )}
+                            </div>
+
+                            {/* Amount and Actions */}
+                            <div className="flex items-center gap-3">
+                              <div className="text-right">
+                                <p className={cn(
+                                  "text-lg font-bold",
+                                  transaction.type === 'income' 
+                                    ? 'text-green-600 dark:text-green-400' 
+                                    : 'text-gray-900 dark:text-gray-100'
+                                )}>
+                                  {transaction.type === 'income' ? '+' : '-'}
+                                  {formatCurrency(transaction.amount)}
+                                </p>
+                                {transaction.attachments.length > 0 && (
+                                  <p className="text-xs text-muted-foreground flex items-center gap-1 justify-end">
+                                    <FileText className="h-3 w-3" />
+                                    {transaction.attachments.length} file{transaction.attachments.length > 1 ? 's' : ''}
+                                  </p>
+                                )}
+                              </div>
+
+                              <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                  <Button 
+                                    variant="ghost" 
+                                    size="icon"
+                                    className="opacity-0 group-hover:opacity-100 transition-opacity"
+                                  >
+                                    <MoreVertical className="h-4 w-4" />
+                                  </Button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent align="end">
+                                  <DropdownMenuItem onClick={() => handleEdit(transaction)}>
+                                    <Edit className="h-4 w-4 mr-2" />
+                                    Edit
+                                  </DropdownMenuItem>
+                                  <DropdownMenuSeparator />
+                                  <DropdownMenuItem 
+                                    onClick={() => handleDelete(transaction._id)}
+                                    className="text-destructive"
+                                  >
+                                    <Trash2 className="h-4 w-4 mr-2" />
+                                    Delete
+                                  </DropdownMenuItem>
+                                </DropdownMenuContent>
+                              </DropdownMenu>
+                            </div>
+                          </div>
                         </div>
-                      </td>
-                      <td className="p-2 text-right">
-                        <span className={cn(
-                          "font-semibold",
-                          transaction.type === 'income' ? 'text-green-600' : 'text-red-600'
-                        )}>
-                          {transaction.type === 'income' ? '+' : '-'}
-                          {formatCurrency(transaction.amount)}
-                        </span>
-                      </td>
-                      <td className="p-2">
-                        <div className="flex items-center justify-center gap-1">
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={() => handleEdit(transaction)}
-                          >
-                            <Edit className="h-4 w-4" />
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={() => handleDelete(transaction._id)}
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
-          </div>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
 
           {/* Pagination */}
           {pagination && pagination.pages > 1 && (
-            <div className="flex items-center justify-center gap-2 mt-4">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
-                disabled={currentPage === 1}
-              >
-                Previous
-              </Button>
-              <span className="text-sm">
-                Page {currentPage} of {pagination.pages}
-              </span>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setCurrentPage(p => Math.min(pagination.pages, p + 1))}
-                disabled={currentPage === pagination.pages}
-              >
-                Next
-              </Button>
+            <div className="flex items-center justify-between p-4 border-t bg-muted/30">
+              <p className="text-sm text-muted-foreground">
+                Showing {((currentPage - 1) * 20) + 1} to {Math.min(currentPage * 20, pagination.total)} of {pagination.total} transactions
+              </p>
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                  disabled={currentPage === 1}
+                >
+                  <ChevronLeft className="h-4 w-4" />
+                  Previous
+                </Button>
+                <div className="flex items-center gap-1">
+                  {Array.from({ length: Math.min(5, pagination.pages) }, (_, i) => {
+                    const pageNumber = i + 1;
+                    return (
+                      <Button
+                        key={pageNumber}
+                        variant={currentPage === pageNumber ? 'default' : 'outline'}
+                        size="sm"
+                        className="w-10"
+                        onClick={() => setCurrentPage(pageNumber)}
+                      >
+                        {pageNumber}
+                      </Button>
+                    );
+                  })}
+                  {pagination.pages > 5 && (
+                    <>
+                      <span className="px-2">...</span>
+                      <Button
+                        variant={currentPage === pagination.pages ? 'default' : 'outline'}
+                        size="sm"
+                        className="w-10"
+                        onClick={() => setCurrentPage(pagination.pages)}
+                      >
+                        {pagination.pages}
+                      </Button>
+                    </>
+                  )}
+                </div>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setCurrentPage(p => Math.min(pagination.pages, p + 1))}
+                  disabled={currentPage === pagination.pages}
+                >
+                  Next
+                  <ChevronRight className="h-4 w-4" />
+                </Button>
+              </div>
             </div>
           )}
         </CardContent>
