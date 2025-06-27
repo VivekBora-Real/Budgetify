@@ -154,37 +154,36 @@ const BalanceOverviewWidget: React.FC<BalanceOverviewProps> = () => {
                 )} />
                 
                 <div className="relative z-10">
-                  <div className="flex items-start justify-between mb-3">
+                  <div className="mb-3">
+                    <div className="flex items-center justify-between mb-2">
+                      <div className={cn(
+                        'p-2 rounded-lg transition-transform group-hover:scale-110',
+                        card.bgColor
+                      )}>
+                        <Icon className={cn('h-4 w-4', card.color)} />
+                      </div>
+                      <div className="flex items-center gap-1">
+                        {card.trend > 0 ? (
+                          <ArrowUpIcon className="h-3 w-3 text-green-500" />
+                        ) : (
+                          <ArrowDownIcon className="h-3 w-3 text-red-500" />
+                        )}
+                        <span
+                          className={cn(
+                            'text-xs font-semibold',
+                            card.trend > 0 ? 'text-green-500' : 'text-red-500'
+                          )}
+                        >
+                          {Math.abs(card.trend)}%
+                        </span>
+                      </div>
+                    </div>
                     <div className="space-y-1">
                       <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
                         {card.title}
                       </p>
                       <p className="text-2xl font-bold tracking-tight">{card.value}</p>
-                    </div>
-                    <div className={cn(
-                      'p-2.5 rounded-xl transition-transform group-hover:scale-110',
-                      card.bgColor
-                    )}>
-                      <Icon className={cn('h-5 w-5', card.color)} />
-                    </div>
-                  </div>
-                  
-                  <div className="flex items-center justify-between">
-                    <p className="text-xs text-muted-foreground">{card.description}</p>
-                    <div className="flex items-center gap-1">
-                      {card.trend > 0 ? (
-                        <ArrowUpIcon className="h-3 w-3 text-green-500" />
-                      ) : (
-                        <ArrowDownIcon className="h-3 w-3 text-red-500" />
-                      )}
-                      <span
-                        className={cn(
-                          'text-xs font-semibold',
-                          card.trend > 0 ? 'text-green-500' : 'text-red-500'
-                        )}
-                      >
-                        {Math.abs(card.trend)}%
-                      </span>
+                      <p className="text-xs text-muted-foreground mt-1">{card.description}</p>
                     </div>
                   </div>
                 </div>

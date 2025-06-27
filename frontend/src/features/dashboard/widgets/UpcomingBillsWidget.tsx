@@ -4,11 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { 
-  Calendar, 
-  Clock, 
   CreditCard, 
-  AlertTriangle,
-  CheckCircle,
   Zap,
   Home,
   Shield,
@@ -17,7 +13,8 @@ import {
   ArrowRight,
   Bell,
   TrendingUp,
-  Repeat
+  Repeat,
+  AlertCircle
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { format, differenceInDays, isToday, isTomorrow } from 'date-fns';
@@ -60,53 +57,49 @@ const UpcomingBillsWidget: React.FC<UpcomingBillsProps> = () => {
 
   const getDueDateDisplay = (dueDate: string) => {
     const date = new Date(dueDate);
+    const days = getDaysUntilDue(dueDate);
+    
     if (isToday(date)) return 'Today';
     if (isTomorrow(date)) return 'Tomorrow';
-    const days = getDaysUntilDue(dueDate);
-    if (days < 0) return `${Math.abs(days)} days overdue`;
-    if (days <= 7) return `${days} days`;
+    if (days < 0) return 'Overdue';
+    if (days <= 7) return `In ${days} days`;
     return format(date, 'MMM d');
   };
 
-  const getDueDateStatus = (daysUntil: number, isPaid: boolean, dueDate: string) => {
+  const getDueDateStatus = (daysUntil: number, isPaid: boolean) => {
     if (isPaid) return { 
       color: 'text-green-600 dark:text-green-400', 
       bg: 'bg-green-50 dark:bg-green-950',
       border: 'border-green-200 dark:border-green-800',
-      label: 'Paid',
-      icon: CheckCircle,
+      dotColor: 'bg-green-500',
       priority: 0
     };
     if (daysUntil < 0) return { 
       color: 'text-red-600 dark:text-red-400', 
       bg: 'bg-red-50 dark:bg-red-950',
       border: 'border-red-200 dark:border-red-800',
-      label: 'Overdue',
-      icon: AlertTriangle,
+      dotColor: 'bg-red-500',
       priority: 4
     };
     if (daysUntil === 0) return { 
       color: 'text-red-600 dark:text-red-400', 
       bg: 'bg-red-50 dark:bg-red-950',
       border: 'border-red-200 dark:border-red-800',
-      label: 'Due Today',
-      icon: AlertTriangle,
+      dotColor: 'bg-red-500',
       priority: 3
     };
     if (daysUntil <= 3) return { 
       color: 'text-orange-600 dark:text-orange-400', 
       bg: 'bg-orange-50 dark:bg-orange-950',
       border: 'border-orange-200 dark:border-orange-800',
-      label: 'Due Soon',
-      icon: Clock,
+      dotColor: 'bg-orange-500',
       priority: 2
     };
     return { 
       color: 'text-blue-600 dark:text-blue-400', 
       bg: 'bg-blue-50 dark:bg-blue-950',
       border: 'border-blue-200 dark:border-blue-800',
-      label: getDueDateDisplay(dueDate),
-      icon: Calendar,
+      dotColor: 'bg-blue-500',
       priority: 1
     };
   };
@@ -130,8 +123,8 @@ const UpcomingBillsWidget: React.FC<UpcomingBillsProps> = () => {
   const sortedBills = [...data].sort((a, b) => {
     const daysA = getDaysUntilDue(a.dueDate);
     const daysB = getDaysUntilDue(b.dueDate);
-    const statusA = getDueDateStatus(daysA, a.isPaid, a.dueDate);
-    const statusB = getDueDateStatus(daysB, b.isPaid, b.dueDate);
+    const statusA = getDueDateStatus(daysA, a.isPaid);
+    const statusB = getDueDateStatus(daysB, b.isPaid);
     return statusB.priority - statusA.priority || daysA - daysB;
   });
 
@@ -164,7 +157,7 @@ const UpcomingBillsWidget: React.FC<UpcomingBillsProps> = () => {
           </Button>
         </div>
       </CardHeader>
-      <CardContent>
+      <CardContent className="px-6 pb-6">
         {data.length === 0 ? (
           <div className="text-center py-12">
             <div className="p-4 bg-muted/50 rounded-full w-fit mx-auto mb-4">
@@ -181,112 +174,102 @@ const UpcomingBillsWidget: React.FC<UpcomingBillsProps> = () => {
           </div>
         ) : (
           <>
-            {/* Summary Cards */}
-            <div className="grid grid-cols-3 gap-3 mb-4">
-              <div className="p-3 bg-gradient-to-br from-primary/5 to-primary/10 rounded-xl border border-primary/20">
+            {/* Summary Stats */}
+            <div className="grid grid-cols-2 gap-3 mb-4">
+              <div className="p-3 bg-gradient-to-br from-primary/5 to-primary/10 rounded-lg border border-primary/20">
                 <div className="flex items-center justify-between mb-1">
-                  <TrendingUp className="h-4 w-4 text-primary" />
-                  <span className="text-xs text-muted-foreground">Total</span>
+                  <span className="text-xs text-muted-foreground">Total Due</span>
+                  <TrendingUp className="h-3 w-3 text-primary" />
                 </div>
                 <p className="font-bold text-lg">{formatCurrency(totalUpcoming)}</p>
+                <p className="text-xs text-muted-foreground">{unpaidBills.length} unpaid bills</p>
               </div>
               
-              {overdueBills.length > 0 && (
-                <div className="p-3 bg-gradient-to-br from-red-50 to-red-100 dark:from-red-950/20 dark:to-red-900/20 rounded-xl border border-red-200 dark:border-red-800">
-                  <div className="flex items-center justify-between mb-1">
-                    <AlertTriangle className="h-4 w-4 text-red-600 dark:text-red-400" />
-                    <span className="text-xs text-red-600 dark:text-red-400">Overdue</span>
-                  </div>
-                  <p className="font-bold text-lg text-red-600 dark:text-red-400">{overdueBills.length}</p>
+              <div className="p-3 bg-gradient-to-br from-orange-50 to-orange-100 dark:from-orange-950/20 dark:to-orange-900/20 rounded-lg border border-orange-200 dark:border-orange-800">
+                <div className="flex items-center justify-between mb-1">
+                  <span className="text-xs text-orange-600 dark:text-orange-400">Attention</span>
+                  <AlertCircle className="h-3 w-3 text-orange-600 dark:text-orange-400" />
                 </div>
-              )}
-              
-              {dueSoonBills.length > 0 && (
-                <div className="p-3 bg-gradient-to-br from-orange-50 to-orange-100 dark:from-orange-950/20 dark:to-orange-900/20 rounded-xl border border-orange-200 dark:border-orange-800">
-                  <div className="flex items-center justify-between mb-1">
-                    <Clock className="h-4 w-4 text-orange-600 dark:text-orange-400" />
-                    <span className="text-xs text-orange-600 dark:text-orange-400">Due Soon</span>
-                  </div>
-                  <p className="font-bold text-lg text-orange-600 dark:text-orange-400">{dueSoonBills.length}</p>
-                </div>
-              )}
+                <p className="font-bold text-lg text-orange-600 dark:text-orange-400">
+                  {overdueBills.length + dueSoonBills.length}
+                </p>
+                <p className="text-xs text-orange-600 dark:text-orange-400">
+                  {overdueBills.length > 0 && `${overdueBills.length} overdue`}
+                  {overdueBills.length > 0 && dueSoonBills.length > 0 && ', '}
+                  {dueSoonBills.length > 0 && `${dueSoonBills.length} due soon`}
+                </p>
+              </div>
             </div>
 
             {/* Bills List */}
-            <div className="space-y-3">
+            <div className="space-y-2">
               {sortedBills.slice(0, 5).map((bill) => {
                 const daysUntil = getDaysUntilDue(bill.dueDate);
-                const status = getDueDateStatus(daysUntil, bill.isPaid, bill.dueDate);
+                const status = getDueDateStatus(daysUntil, bill.isPaid);
                 const CategoryIcon = getCategoryIcon(bill.category);
                 
                 return (
                   <div
                     key={bill.id}
                     className={cn(
-                      'group p-4 rounded-xl border transition-all hover:shadow-md',
-                      'hover:border-primary/20',
+                      'group p-3 rounded-lg border transition-all',
+                      'hover:shadow-sm hover:border-primary/20',
                       bill.isPaid && 'opacity-60',
-                      daysUntil < 0 && !bill.isPaid && 'border-red-200 dark:border-red-800 bg-red-50/30 dark:bg-red-950/30'
+                      daysUntil < 0 && !bill.isPaid && 'bg-red-50/50 dark:bg-red-950/20'
                     )}
                   >
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-3">
-                        <div className={cn(
-                          "p-2.5 rounded-lg transition-transform group-hover:scale-110",
-                          status.bg
-                        )}>
-                          <CategoryIcon className={cn("h-4 w-4", status.color)} />
+                    <div className="flex items-center gap-3">
+                      {/* Icon */}
+                      <div className={cn(
+                        "p-2 rounded-lg flex-shrink-0",
+                        status.bg
+                      )}>
+                        <CategoryIcon className={cn("h-4 w-4", status.color)} />
+                      </div>
+                      
+                      {/* Content */}
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 mb-1">
+                          <p className={cn(
+                            'font-medium text-sm truncate', 
+                            bill.isPaid && 'line-through text-muted-foreground'
+                          )}>
+                            {bill.name}
+                          </p>
+                          {bill.isRecurring && (
+                            <Badge 
+                              variant="outline" 
+                              className="text-xs h-5 px-1"
+                            >
+                              <Repeat className="h-3 w-3" />
+                            </Badge>
+                          )}
                         </div>
-                        <div className="space-y-1">
-                          <div className="flex items-center gap-2">
-                            <p className={cn(
-                              'font-medium', 
-                              bill.isPaid && 'line-through text-muted-foreground'
-                            )}>
-                              {bill.name}
-                            </p>
-                            {bill.isRecurring && (
-                              <Badge 
-                                variant="outline" 
-                                className="text-xs border-primary/20 bg-primary/5"
-                              >
-                                <Repeat className="h-3 w-3 mr-1" />
-                                {bill.frequency}
-                              </Badge>
-                            )}
-                          </div>
-                          <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                            <Calendar className="h-3 w-3" />
-                            <span>{format(new Date(bill.dueDate), 'MMM d, yyyy')}</span>
-                            <span>•</span>
-                            <span>{bill.category}</span>
-                          </div>
+                        <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                          <span>{bill.category}</span>
+                          <span>•</span>
+                          <span>{format(new Date(bill.dueDate), 'MMM d')}</span>
                         </div>
                       </div>
                       
-                      <div className="flex items-center gap-3">
+                      {/* Right side */}
+                      <div className="flex items-center gap-3 flex-shrink-0">
                         <div className="text-right">
-                          <p className="font-bold text-lg">{formatCurrency(bill.amount)}</p>
-                          <Badge 
-                            variant="outline"
-                            className={cn(
-                              'text-xs border gap-1',
-                              status.border,
-                              status.bg,
-                              status.color
-                            )}
-                          >
-                            <status.icon className="h-3 w-3" />
-                            {status.label}
-                          </Badge>
+                          <p className="font-semibold text-sm">{formatCurrency(bill.amount)}</p>
+                          <div className="flex items-center gap-1 justify-end">
+                            <div className={cn("w-2 h-2 rounded-full", status.dotColor)} />
+                            <span className={cn("text-xs", status.color)}>
+                              {getDueDateDisplay(bill.dueDate)}
+                            </span>
+                          </div>
                         </div>
                         {!bill.isPaid && (
                           <Button 
                             size="sm" 
                             variant={daysUntil <= 0 ? 'destructive' : 'outline'}
-                            className="opacity-0 group-hover:opacity-100 transition-opacity"
+                            className="h-8 px-3 opacity-0 group-hover:opacity-100 transition-opacity"
                           >
-                            Pay Now
+                            Pay
                           </Button>
                         )}
                       </div>
@@ -297,18 +280,16 @@ const UpcomingBillsWidget: React.FC<UpcomingBillsProps> = () => {
             </div>
             
             {data.length > 5 && (
-              <div className="mt-4 pt-4 border-t">
-                <Button 
-                  variant="ghost" 
-                  className="w-full hover:bg-primary/5"
-                  onClick={() => navigate('/bills')}
-                >
-                  <span className="text-sm text-muted-foreground">
-                    View all {data.length} bills
-                  </span>
-                  <ArrowRight className="h-3 w-3 ml-2 text-muted-foreground" />
-                </Button>
-              </div>
+              <Button 
+                variant="ghost" 
+                className="w-full mt-3 hover:bg-primary/5"
+                onClick={() => navigate('/bills')}
+              >
+                <span className="text-sm text-muted-foreground">
+                  View all {data.length} bills
+                </span>
+                <ArrowRight className="h-3 w-3 ml-2 text-muted-foreground" />
+              </Button>
             )}
           </>
         )}
