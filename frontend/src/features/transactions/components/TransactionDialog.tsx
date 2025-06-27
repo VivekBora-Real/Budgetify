@@ -25,7 +25,36 @@ import {
   PopoverTrigger,
 } from '@/components/ui/popover';
 import { Switch } from '@/components/ui/switch';
-import { CalendarIcon } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
+import { 
+  CalendarIcon,
+  ArrowDownRight,
+  ArrowUpRight,
+  Wallet,
+  Tag,
+  DollarSign,
+  FileText,
+  Repeat,
+  Briefcase,
+  ShoppingBag,
+  Car,
+  Home,
+  Heart,
+  Gamepad2,
+  Utensils,
+  Zap,
+  GraduationCap,
+  Plane,
+  Sparkles,
+  Gift,
+  Building2,
+  TrendingUp,
+  Users,
+  RefreshCw,
+  Plus,
+  X,
+  Loader2
+} from 'lucide-react';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
 import api from '@/services/api';
@@ -123,6 +152,15 @@ const TransactionDialog: React.FC<TransactionDialogProps> = ({
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
+    if (!formData.accountId || !formData.amount || !formData.category || !formData.description) {
+      toast({
+        title: 'Validation Error',
+        description: 'Please fill in all required fields',
+        variant: 'destructive',
+      });
+      return;
+    }
+
     const payload = {
       ...formData,
       amount: parseFloat(formData.amount),
@@ -149,216 +187,374 @@ const TransactionDialog: React.FC<TransactionDialogProps> = ({
     }));
   };
 
+  const getCategoryIcon = (category: string) => {
+    const icons: Record<string, any> = {
+      // Expense categories
+      'Food & Dining': Utensils,
+      'Transportation': Car,
+      'Shopping': ShoppingBag,
+      'Entertainment': Gamepad2,
+      'Bills & Utilities': Zap,
+      'Healthcare': Heart,
+      'Education': GraduationCap,
+      'Travel': Plane,
+      'Personal Care': Sparkles,
+      'Gifts & Donations': Gift,
+      'Investments': TrendingUp,
+      'Business': Building2,
+      // Income categories
+      'Salary': Briefcase,
+      'Freelance': Users,
+      'Rental': Home,
+      'Refunds': RefreshCw,
+      'Other': FileText,
+    };
+    return icons[category] || FileText;
+  };
+
   const categories = formData.type === 'income' ? INCOME_CATEGORIES : EXPENSE_CATEGORIES;
   const accounts = accountsData || [];
 
+  // Quick amount buttons
+  const quickAmounts = formData.type === 'expense' 
+    ? [10, 25, 50, 100, 250, 500]
+    : [100, 500, 1000, 2500, 5000, 10000];
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[525px]">
+      <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
         <form onSubmit={handleSubmit}>
           <DialogHeader>
-            <DialogTitle>
-              {transaction ? 'Edit Transaction' : 'Add Transaction'}
+            <DialogTitle className="flex items-center gap-2 text-xl">
+              {transaction ? (
+                <>
+                  <FileText className="h-5 w-5 text-primary" />
+                  Edit Transaction
+                </>
+              ) : (
+                <>
+                  <Plus className="h-5 w-5 text-primary" />
+                  Add New Transaction
+                </>
+              )}
             </DialogTitle>
             <DialogDescription>
               {transaction 
-                ? 'Update the transaction details below.'
-                : 'Enter the details for your new transaction.'}
+                ? 'Update the transaction details below'
+                : 'Record your income or expense'}
             </DialogDescription>
           </DialogHeader>
           
-          <div className="grid gap-4 py-4">
-            {/* Type */}
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="type" className="text-right">
-                Type
-              </Label>
-              <Select
-                value={formData.type}
-                onValueChange={(value: 'income' | 'expense') => {
-                  setFormData(prev => ({ ...prev, type: value, category: '' }));
-                }}
-              >
-                <SelectTrigger className="col-span-3">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="income">Income</SelectItem>
-                  <SelectItem value="expense">Expense</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
+          <div className="space-y-6 py-6">
+            {/* Type Selection */}
+            <div className="space-y-2">
+              <Label className="text-sm font-medium">Transaction Type</Label>
+              <div className="grid grid-cols-2 gap-3">
+                <button
+                  type="button"
+                  onClick={() => setFormData(prev => ({ ...prev, type: 'income', category: '' }))}
+                  className={cn(
+                    "relative p-4 rounded-xl border-2 transition-all duration-200",
+                    "hover:shadow-md hover:border-primary/50",
+                    formData.type === 'income' 
+                      ? "border-green-500 bg-green-50 dark:bg-green-950/20" 
+                      : "border-muted hover:border-muted-foreground/30"
+                  )}
+                >
+                  <div className="flex flex-col items-center gap-2">
+                    <div className={cn(
+                      "p-3 rounded-full transition-colors",
+                      formData.type === 'income' 
+                        ? "bg-green-500 text-white" 
+                        : "bg-muted text-muted-foreground"
+                    )}>
+                      <ArrowDownRight className="h-6 w-6" />
+                    </div>
+                    <span className={cn(
+                      "font-medium",
+                      formData.type === 'income' && "text-green-700 dark:text-green-300"
+                    )}>
+                      Income
+                    </span>
+                  </div>
+                </button>
 
-            {/* Account */}
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="account" className="text-right">
-                Account
-              </Label>
-              <Select
-                value={formData.accountId}
-                onValueChange={(value) => setFormData(prev => ({ ...prev, accountId: value }))}
-              >
-                <SelectTrigger className="col-span-3">
-                  <SelectValue placeholder="Select an account" />
-                </SelectTrigger>
-                <SelectContent>
-                  {accounts.map((account: any) => (
-                    <SelectItem key={account._id} value={account._id}>
-                      <div className="flex items-center gap-2">
-                        <div 
-                          className="w-3 h-3 rounded-full"
-                          style={{ backgroundColor: account.color }}
-                        />
-                        {account.name}
-                      </div>
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+                <button
+                  type="button"
+                  onClick={() => setFormData(prev => ({ ...prev, type: 'expense', category: '' }))}
+                  className={cn(
+                    "relative p-4 rounded-xl border-2 transition-all duration-200",
+                    "hover:shadow-md hover:border-primary/50",
+                    formData.type === 'expense' 
+                      ? "border-red-500 bg-red-50 dark:bg-red-950/20" 
+                      : "border-muted hover:border-muted-foreground/30"
+                  )}
+                >
+                  <div className="flex flex-col items-center gap-2">
+                    <div className={cn(
+                      "p-3 rounded-full transition-colors",
+                      formData.type === 'expense' 
+                        ? "bg-red-500 text-white" 
+                        : "bg-muted text-muted-foreground"
+                    )}>
+                      <ArrowUpRight className="h-6 w-6" />
+                    </div>
+                    <span className={cn(
+                      "font-medium",
+                      formData.type === 'expense' && "text-red-700 dark:text-red-300"
+                    )}>
+                      Expense
+                    </span>
+                  </div>
+                </button>
+              </div>
             </div>
 
             {/* Amount */}
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="amount" className="text-right">
+            <div className="space-y-2">
+              <Label htmlFor="amount" className="text-sm font-medium flex items-center gap-2">
+                <DollarSign className="h-4 w-4 text-primary" />
                 Amount
               </Label>
-              <Input
-                id="amount"
-                type="number"
-                step="0.01"
-                value={formData.amount}
-                onChange={(e) => setFormData(prev => ({ ...prev, amount: e.target.value }))}
-                className="col-span-3"
-                placeholder="0.00"
-                required
-              />
+              <div className="space-y-3">
+                <div className="relative">
+                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
+                    $
+                  </span>
+                  <Input
+                    id="amount"
+                    type="number"
+                    step="0.01"
+                    value={formData.amount}
+                    onChange={(e) => setFormData(prev => ({ ...prev, amount: e.target.value }))}
+                    className="pl-8 text-lg font-semibold"
+                    placeholder="0.00"
+                    required
+                  />
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  {quickAmounts.map((amount) => (
+                    <Button
+                      key={amount}
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setFormData(prev => ({ ...prev, amount: amount.toString() }))}
+                      className="hover:bg-primary hover:text-primary-foreground transition-colors"
+                    >
+                      ${amount}
+                    </Button>
+                  ))}
+                </div>
+              </div>
             </div>
 
-            {/* Category */}
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="category" className="text-right">
-                Category
-              </Label>
-              <Select
-                value={formData.category}
-                onValueChange={(value) => setFormData(prev => ({ ...prev, category: value }))}
-              >
-                <SelectTrigger className="col-span-3">
-                  <SelectValue placeholder="Select a category" />
-                </SelectTrigger>
-                <SelectContent>
-                  {categories.map((category) => (
-                    <SelectItem key={category} value={category}>
-                      {category}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+            {/* Category Selection */}
+            <div className="space-y-2">
+              <Label className="text-sm font-medium">Category</Label>
+              <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
+                {categories.map((category) => {
+                  const Icon = getCategoryIcon(category);
+                  return (
+                    <button
+                      key={category}
+                      type="button"
+                      onClick={() => setFormData(prev => ({ ...prev, category }))}
+                      className={cn(
+                        "p-3 rounded-lg border transition-all duration-200",
+                        "hover:shadow-sm hover:border-primary/50",
+                        "flex flex-col items-center gap-2 text-center",
+                        formData.category === category 
+                          ? "border-primary bg-primary/10 text-primary" 
+                          : "border-muted hover:border-muted-foreground/30"
+                      )}
+                    >
+                      <Icon className={cn(
+                        "h-5 w-5",
+                        formData.category === category && "text-primary"
+                      )} />
+                      <span className="text-xs font-medium line-clamp-1">
+                        {category}
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Account and Date Row */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {/* Account */}
+              <div className="space-y-2">
+                <Label className="text-sm font-medium flex items-center gap-2">
+                  <Wallet className="h-4 w-4 text-primary" />
+                  Account
+                </Label>
+                <Select
+                  value={formData.accountId}
+                  onValueChange={(value) => setFormData(prev => ({ ...prev, accountId: value }))}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select account" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {accounts.map((account: any) => (
+                      <SelectItem key={account._id} value={account._id}>
+                        <div className="flex items-center gap-2">
+                          <div 
+                            className="w-3 h-3 rounded-full"
+                            style={{ backgroundColor: account.color }}
+                          />
+                          <span>{account.name}</span>
+                          <span className="text-xs text-muted-foreground">
+                            ({account.type})
+                          </span>
+                        </div>
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {/* Date */}
+              <div className="space-y-2">
+                <Label className="text-sm font-medium flex items-center gap-2">
+                  <CalendarIcon className="h-4 w-4 text-primary" />
+                  Date
+                </Label>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="outline"
+                      className={cn(
+                        "w-full justify-start text-left font-normal",
+                        !formData.date && "text-muted-foreground"
+                      )}
+                    >
+                      <CalendarIcon className="mr-2 h-4 w-4" />
+                      {formData.date ? format(formData.date, "PPP") : "Pick a date"}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0">
+                    <Calendar
+                      mode="single"
+                      selected={formData.date}
+                      onSelect={(date) => date && setFormData(prev => ({ ...prev, date }))}
+                      initialFocus
+                    />
+                  </PopoverContent>
+                </Popover>
+              </div>
             </div>
 
             {/* Description */}
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="description" className="text-right">
+            <div className="space-y-2">
+              <Label htmlFor="description" className="text-sm font-medium flex items-center gap-2">
+                <FileText className="h-4 w-4 text-primary" />
                 Description
               </Label>
               <Input
                 id="description"
                 value={formData.description}
                 onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
-                className="col-span-3"
-                placeholder="Enter description"
+                placeholder="What was this transaction for?"
                 required
               />
             </div>
 
-            {/* Date */}
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="date" className="text-right">
-                Date
-              </Label>
-              <Popover>
-                <PopoverTrigger asChild>
-                  <Button
-                    variant="outline"
-                    className={cn(
-                      "col-span-3 justify-start text-left font-normal",
-                      !formData.date && "text-muted-foreground"
-                    )}
-                  >
-                    <CalendarIcon className="mr-2 h-4 w-4" />
-                    {formData.date ? format(formData.date, "PPP") : "Pick a date"}
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0">
-                  <Calendar
-                    mode="single"
-                    selected={formData.date}
-                    onSelect={(date) => date && setFormData(prev => ({ ...prev, date }))}
-                    initialFocus
-                  />
-                </PopoverContent>
-              </Popover>
-            </div>
-
             {/* Tags */}
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="tags" className="text-right">
+            <div className="space-y-2">
+              <Label className="text-sm font-medium flex items-center gap-2">
+                <Tag className="h-4 w-4 text-primary" />
                 Tags
+                <span className="text-xs text-muted-foreground">(Optional)</span>
               </Label>
-              <div className="col-span-3 space-y-2">
+              <div className="space-y-3">
                 <div className="flex gap-2">
                   <Input
                     value={tagInput}
                     onChange={(e) => setTagInput(e.target.value)}
                     placeholder="Add a tag"
-                    onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), addTag())}
+                    onKeyPress={(e) => {
+                      if (e.key === 'Enter') {
+                        e.preventDefault();
+                        addTag();
+                      }
+                    }}
                   />
-                  <Button type="button" variant="outline" onClick={addTag}>
-                    Add
+                  <Button 
+                    type="button" 
+                    variant="outline" 
+                    onClick={addTag}
+                    disabled={!tagInput}
+                  >
+                    <Plus className="h-4 w-4" />
                   </Button>
                 </div>
                 {formData.tags.length > 0 && (
                   <div className="flex flex-wrap gap-2">
                     {formData.tags.map((tag) => (
-                      <span
+                      <Badge
                         key={tag}
-                        className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-secondary text-secondary-foreground cursor-pointer hover:bg-secondary/80"
+                        variant="secondary"
+                        className="cursor-pointer hover:bg-destructive hover:text-destructive-foreground transition-colors"
                         onClick={() => removeTag(tag)}
                       >
-                        {tag} ×
-                      </span>
+                        {tag}
+                        <X className="h-3 w-3 ml-1" />
+                      </Badge>
                     ))}
                   </div>
                 )}
               </div>
             </div>
 
-            {/* Recurring */}
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="recurring" className="text-right">
-                Recurring
-              </Label>
-              <div className="col-span-3 flex items-center gap-2">
-                <Switch
-                  id="recurring"
-                  checked={formData.isRecurring}
-                  onCheckedChange={(checked) => 
-                    setFormData(prev => ({ ...prev, isRecurring: checked }))
-                  }
-                />
-                <Label htmlFor="recurring" className="font-normal">
-                  This is a recurring transaction
-                </Label>
+            {/* Recurring Toggle */}
+            <div className="flex items-center justify-between p-4 rounded-lg border bg-muted/50">
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-primary/10 rounded-lg">
+                  <Repeat className="h-4 w-4 text-primary" />
+                </div>
+                <div>
+                  <Label htmlFor="recurring" className="text-sm font-medium cursor-pointer">
+                    Recurring Transaction
+                  </Label>
+                  <p className="text-xs text-muted-foreground">
+                    This transaction repeats regularly
+                  </p>
+                </div>
               </div>
+              <Switch
+                id="recurring"
+                checked={formData.isRecurring}
+                onCheckedChange={(checked) => 
+                  setFormData(prev => ({ ...prev, isRecurring: checked }))
+                }
+              />
             </div>
           </div>
 
-          <DialogFooter>
-            <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+          <DialogFooter className="flex gap-2">
+            <Button 
+              type="button" 
+              variant="outline" 
+              onClick={() => onOpenChange(false)}
+            >
               Cancel
             </Button>
-            <Button type="submit" disabled={mutation.isPending}>
-              {mutation.isPending ? 'Saving...' : transaction ? 'Update' : 'Create'}
+            <Button 
+              type="submit" 
+              disabled={mutation.isPending}
+              className="min-w-[100px]"
+            >
+              {mutation.isPending ? (
+                <>
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  Saving...
+                </>
+              ) : (
+                transaction ? 'Update' : 'Create'
+              )}
             </Button>
           </DialogFooter>
         </form>
