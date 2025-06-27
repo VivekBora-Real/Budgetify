@@ -1,5 +1,4 @@
 import mongoose from 'mongoose';
-import bcrypt from 'bcrypt';
 import { config } from 'dotenv';
 import { addDays, subDays, subMonths, addMonths } from 'date-fns';
 
@@ -59,25 +58,22 @@ async function createDemoUser(): Promise<IUser> {
   console.log('👤 Creating demo user...');
   const { User } = getModels();
   
-  let user = await User.findOne({ email: DEMO_EMAIL });
+  // Delete existing demo user to ensure password is correct
+  await User.deleteOne({ email: DEMO_EMAIL });
   
-  if (!user) {
-    const hashedPassword = await bcrypt.hash(DEMO_PASSWORD, 10);
-    user = await User.create({
-      email: DEMO_EMAIL,
-      password: hashedPassword,
-      profile: {
-        firstName: 'Demo',
-        lastName: 'User',
-        currency: 'USD',
-        timezone: 'America/New_York'
-      },
-      isActive: true,
-    });
-    console.log('✅ Demo user created');
-  } else {
-    console.log('ℹ️  Demo user already exists');
-  }
+  // Don't pre-hash the password - let the model handle it
+  const user = await User.create({
+    email: DEMO_EMAIL,
+    password: DEMO_PASSWORD, // Pass plain password, model will hash it
+    profile: {
+      firstName: 'Demo',
+      lastName: 'User',
+      currency: 'USD',
+      timezone: 'America/New_York'
+    },
+    isActive: true,
+  });
+  console.log('✅ Demo user created');
   
   return user!;
 }
