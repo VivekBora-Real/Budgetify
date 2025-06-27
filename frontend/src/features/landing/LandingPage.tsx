@@ -12,7 +12,7 @@ import {
   ArrowRight,
   Check
 } from 'lucide-react';
-import { Button } from '../../components/ui/Button';
+import { Button } from '@/components/ui/button';
 import { useAppDispatch, useAppSelector } from '../../hooks/redux';
 import { toggleTheme } from '../../store/slices/uiSlice';
 
