@@ -2,6 +2,7 @@ import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import type { PayloadAction } from '@reduxjs/toolkit';
 import authService from '../../services/auth.service';
 import type { LoginCredentials, RegisterData, User, AuthTokens } from '../../types';
+import { queryClient } from '../../lib/query-client';
 
 interface AuthState {
   user: User | null;
@@ -83,6 +84,8 @@ const authSlice = createSlice({
         state.error = null;
         // Store user data in localStorage
         localStorage.setItem('user', JSON.stringify(action.payload.user));
+        // Clear React Query cache for new user
+        queryClient.clear();
       })
       .addCase(login.rejected, (state, action) => {
         state.loading = false;
@@ -103,6 +106,8 @@ const authSlice = createSlice({
         state.error = null;
         // Store user data in localStorage
         localStorage.setItem('user', JSON.stringify(action.payload.user));
+        // Clear React Query cache for new user
+        queryClient.clear();
       })
       .addCase(register.rejected, (state, action) => {
         state.loading = false;
@@ -118,6 +123,8 @@ const authSlice = createSlice({
         state.error = null;
         // Clear user data from localStorage
         localStorage.removeItem('user');
+        // Clear React Query cache on logout
+        queryClient.clear();
       });
     
     // Refresh token
@@ -129,6 +136,8 @@ const authSlice = createSlice({
         state.user = null;
         state.tokens = null;
         state.isAuthenticated = false;
+        // Clear React Query cache when refresh fails
+        queryClient.clear();
       });
   },
 });
