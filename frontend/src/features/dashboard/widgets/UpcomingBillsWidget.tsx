@@ -68,7 +68,7 @@ const UpcomingBillsWidget: React.FC<UpcomingBillsProps> = () => {
     return format(date, 'MMM d');
   };
 
-  const getDueDateStatus = (daysUntil: number, isPaid: boolean) => {
+  const getDueDateStatus = (daysUntil: number, isPaid: boolean, dueDate: string) => {
     if (isPaid) return { 
       color: 'text-green-600 dark:text-green-400', 
       bg: 'bg-green-50 dark:bg-green-950',
@@ -105,7 +105,7 @@ const UpcomingBillsWidget: React.FC<UpcomingBillsProps> = () => {
       color: 'text-blue-600 dark:text-blue-400', 
       bg: 'bg-blue-50 dark:bg-blue-950',
       border: 'border-blue-200 dark:border-blue-800',
-      label: getDueDateDisplay(daysUntil.toString()),
+      label: getDueDateDisplay(dueDate),
       icon: Calendar,
       priority: 1
     };
@@ -130,8 +130,8 @@ const UpcomingBillsWidget: React.FC<UpcomingBillsProps> = () => {
   const sortedBills = [...data].sort((a, b) => {
     const daysA = getDaysUntilDue(a.dueDate);
     const daysB = getDaysUntilDue(b.dueDate);
-    const statusA = getDueDateStatus(daysA, a.isPaid);
-    const statusB = getDueDateStatus(daysB, b.isPaid);
+    const statusA = getDueDateStatus(daysA, a.isPaid, a.dueDate);
+    const statusB = getDueDateStatus(daysB, b.isPaid, b.dueDate);
     return statusB.priority - statusA.priority || daysA - daysB;
   });
 
@@ -216,7 +216,7 @@ const UpcomingBillsWidget: React.FC<UpcomingBillsProps> = () => {
             <div className="space-y-3">
               {sortedBills.slice(0, 5).map((bill) => {
                 const daysUntil = getDaysUntilDue(bill.dueDate);
-                const status = getDueDateStatus(daysUntil, bill.isPaid);
+                const status = getDueDateStatus(daysUntil, bill.isPaid, bill.dueDate);
                 const CategoryIcon = getCategoryIcon(bill.category);
                 
                 return (
