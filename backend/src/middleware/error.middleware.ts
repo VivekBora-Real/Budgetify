@@ -1,5 +1,4 @@
 import { Request, Response, NextFunction } from 'express';
-import { ValidationError } from 'express-validator';
 import { ERROR_CODES } from '../utils/constants';
 
 interface AppError extends Error {
@@ -23,9 +22,9 @@ export const createError = (
 
 export const errorHandler = (
   err: AppError,
-  req: Request,
+  _req: Request,
   res: Response,
-  next: NextFunction
+  _next: NextFunction
 ) => {
   let statusCode = err.statusCode || 500;
   let message = err.message || 'Internal server error';

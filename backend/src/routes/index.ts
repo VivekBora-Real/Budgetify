@@ -13,7 +13,7 @@ import loanRoutes from './loan.routes';
 const router = Router();
 
 // API version
-router.get('/', (req, res) => {
+router.get('/', (_req, res) => {
   res.json({
     message: 'BudgetApp API',
     version: '1.0.0',

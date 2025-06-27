@@ -5,7 +5,7 @@ import { asyncHandler } from '../middleware/error.middleware';
 export const register = asyncHandler(async (
   req: Request,
   res: Response,
-  next: NextFunction
+  _next: NextFunction
 ) => {
   const { email, password, firstName, lastName } = req.body;
   
@@ -33,7 +33,7 @@ export const register = asyncHandler(async (
 export const login = asyncHandler(async (
   req: Request,
   res: Response,
-  next: NextFunction
+  _next: NextFunction
 ) => {
   const { email, password } = req.body;
   
@@ -56,7 +56,7 @@ export const login = asyncHandler(async (
 export const refreshToken = asyncHandler(async (
   req: Request,
   res: Response,
-  next: NextFunction
+  _next: NextFunction
 ) => {
   const { refreshToken } = req.body;
   
@@ -69,9 +69,9 @@ export const refreshToken = asyncHandler(async (
 });
 
 export const logout = asyncHandler(async (
-  req: Request,
+  _req: Request,
   res: Response,
-  next: NextFunction
+  _next: NextFunction
 ) => {
   // In a production app, you might want to blacklist the token here
   // For now, we'll just send a success response

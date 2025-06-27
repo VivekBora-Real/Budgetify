@@ -7,23 +7,23 @@ const router = Router();
 router.use(authenticate);
 
 // Placeholder routes - to be implemented
-router.get('/', (req, res) => {
+router.get('/', (_req, res) => {
   res.json({ message: 'Get all transactions - To be implemented' });
 });
 
-router.post('/', (req, res) => {
+router.post('/', (_req, res) => {
   res.json({ message: 'Create transaction - To be implemented' });
 });
 
-router.get('/:id', (req, res) => {
+router.get('/:id', (_req, res) => {
   res.json({ message: 'Get transaction by ID - To be implemented' });
 });
 
-router.put('/:id', (req, res) => {
+router.put('/:id', (_req, res) => {
   res.json({ message: 'Update transaction - To be implemented' });
 });
 
-router.delete('/:id', (req, res) => {
+router.delete('/:id', (_req, res) => {
   res.json({ message: 'Delete transaction - To be implemented' });
 });
 

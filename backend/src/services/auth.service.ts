@@ -1,4 +1,4 @@
-import jwt from 'jsonwebtoken';
+import jwt, { SignOptions } from 'jsonwebtoken';
 import User, { IUser } from '../models/user.model';
 import Category from '../models/category.model';
 import { DEFAULT_CATEGORIES } from '../utils/constants';
@@ -17,12 +17,13 @@ interface AuthTokens {
 
 export class AuthService {
   private generateToken(payload: TokenPayload, secret: string, expiresIn: string): string {
-    return jwt.sign(payload, secret, { expiresIn });
+    const options: SignOptions = { expiresIn: expiresIn as any };
+    return jwt.sign(payload, secret, options);
   }
   
   generateAuthTokens(user: IUser): AuthTokens {
     const payload: TokenPayload = {
-      userId: user._id.toString(),
+      userId: (user._id as any).toString(),
       email: user.email
     };
     
@@ -66,7 +67,7 @@ export class AuthService {
     });
     
     // Create default categories for the user
-    await this.createDefaultCategories(user._id.toString());
+    await this.createDefaultCategories((user._id as any).toString());
     
     // Generate tokens
     const tokens = this.generateAuthTokens(user);

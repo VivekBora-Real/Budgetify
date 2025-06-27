@@ -5,7 +5,7 @@ export interface IWarranty extends Document {
   userId: mongoose.Types.ObjectId;
   productName: string;
   brand?: string;
-  model?: string;
+  productModel?: string;
   serialNumber?: string;
   purchaseDate: Date;
   expiryDate: Date;
@@ -37,7 +37,7 @@ const warrantySchema = new Schema<IWarranty>(
       type: String,
       trim: true
     },
-    model: {
+    productModel: {
       type: String,
       trim: true
     },

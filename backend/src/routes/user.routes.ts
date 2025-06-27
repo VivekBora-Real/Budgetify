@@ -7,15 +7,15 @@ const router = Router();
 router.use(authenticate);
 
 // Placeholder routes - to be implemented
-router.get('/profile', (req, res) => {
+router.get('/profile', (_req, res) => {
   res.json({ message: 'Get user profile - To be implemented' });
 });
 
-router.put('/profile', (req, res) => {
+router.put('/profile', (_req, res) => {
   res.json({ message: 'Update user profile - To be implemented' });
 });
 
-router.put('/preferences', (req, res) => {
+router.put('/preferences', (_req, res) => {
   res.json({ message: 'Update user preferences - To be implemented' });
 });
 
